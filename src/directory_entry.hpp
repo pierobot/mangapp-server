@@ -1,0 +1,103 @@
+#ifndef DIRECTORY_ENTRY_HPP
+#define DIRECTORY_ENTRY_HPP
+
+#include "directory_file_entry.hpp"
+#include "file_enumeration.hpp"
+#include "http_utility.hpp"
+
+#include <unordered_map>
+#include <memory>
+#include <string>
+
+#include <utf8/utf8.h>
+#include <json11/json11.hpp>
+
+#include <boost/functional/hash.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <boost/filesystem.hpp>
+
+namespace base
+{
+    template<class FileEntryType>
+    class directory_entry
+    {
+    public:
+        typedef FileEntryType entry_type;
+        typedef std::unordered_map<size_t, entry_type> map_type;
+
+        typedef typename map_type::const_iterator const_iterator;
+
+        directory_entry(std::wstring const & path, std::wstring const & name, size_t key) :
+            m_path(path),
+            m_name(name),
+            m_key(key)
+        {
+            std::string name_utf8;
+            utf8::utf16to8(m_name.cbegin(), m_name.cend(), std::back_inserter(name_utf8));
+
+            m_json = json11::Json::array { std::to_string(m_key), name_utf8 };
+
+            enumerate_files(path + name, file_search_flags::FlagFile, false,
+                [this, &path](std::wstring const & full_path, file_search_flags flag)
+            {
+                auto path_end_pos = full_path.rfind(L"/");
+                
+                std::wstring name_str = full_path.substr(path_end_pos + 1);
+                std::wstring path_str(full_path, 0, path_end_pos + 1);
+
+                auto key = boost::hash<std::wstring>()(name_str);
+                m_files.emplace(key, entry_type(path_str, name_str, key));
+            });
+        }
+
+
+        virtual ~directory_entry()
+        {
+        }
+
+        const_iterator cbegin() const
+        {
+            return m_files.cbegin();
+        }
+
+        const_iterator cend() const
+        {
+            return m_files.cend();
+        }
+
+        const_iterator find(size_t key) const
+        {
+            return m_files.find(key);
+        }
+
+        std::wstring const & get_path() const
+        {
+            return m_path;
+        }
+
+        std::wstring const & get_name() const
+        {
+            return m_name;
+        }
+
+        size_t const get_key() const
+        {
+            return m_key;
+        }
+
+        json11::Json const & to_json() const
+        {
+            return m_json;
+        }
+    protected:
+        map_type m_files;
+    private:
+        std::wstring const m_path;
+        std::wstring const m_name;
+        size_t const m_key;
+        json11::Json m_json;
+    };
+
+}
+
+#endif
