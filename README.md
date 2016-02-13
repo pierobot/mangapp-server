@@ -6,7 +6,12 @@ This is **not** an application to download manga from various sources. If that's
 
 ##Basic Usage:
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
-``{ "key": "", "name": "" }``</br></br>
+```
+{
+  "key": "",
+  "name": ""
+}
+```
 **``/mangapp/thumbnail/key``**: Retrieves the thumbnail image, if any, for the manga specified by ``key``</br></br>
 **``/mangapp/details/key``**: Retrieves the details of the manga specified by ``key`` in the following JSON format:</br>
 ```
