@@ -11,12 +11,12 @@ SET(${PROJECT_NAME}_PATCH_VERSION 0)
 FILE(GLOB SERVER_SOURCES *.cpp *.hpp)
 FILE(GLOB JSON11_SOURCES ../include/json11/json11.cpp ../include/json11/json11.h)
 FILE(GLOB 7Z_SOURCES ../include/7z/7zAlloc.c
-	                 ../include/7z/7zBuf.c
+                     ../include/7z/7zBuf.c
 		             ../include/7z/7zCrc.c
 					 ../include/7z/7zCrcOpt.c
 					 ../include/7z/7zFile.c
 					 ../include/7z/7zDec.c
-					 ../include/7z/7zArcIn.c
+                     ../include/7z/7zArcIn.c
 					 ../include/7z/7zStream.c
 					 ../include/7z/Bcj2.c
 					 ../include/7z/Bra.c
@@ -26,7 +26,7 @@ FILE(GLOB 7Z_SOURCES ../include/7z/7zAlloc.c
 					 ../include/7z/Delta.c
 					 ../include/7z/Lzma2Dec.c
 					 ../include/7z/LzmaDec.c
-					 ../include/7z/Ppmd7.c
+                     ../include/7z/Ppmd7.c
 					 ../include/7z/Ppmd7Dec.c)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES}
