@@ -1,5 +1,7 @@
 # mangapp-server
 
+Still in development and **probably** not ready for usage. Use at your own risk.
+
 This is **not** an application to download manga from various sources. If that's what you're after, look elsewhere.
 
 ##Basic Usage:
