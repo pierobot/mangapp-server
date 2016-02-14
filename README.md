@@ -37,5 +37,6 @@ This is **not** an application to download manga from various sources. If that's
 
 ##Dependencies
 boost:  http://www.boost.org/ </br>
+zlib:   http://zlib.net/ </br>
 libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
