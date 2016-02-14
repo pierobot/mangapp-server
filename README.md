@@ -4,7 +4,7 @@ Still in development and **probably** not ready for usage. Use at your own risk.
 
 This is **not** an application to download manga from various sources. If that's what you're after, look elsewhere.
 
-##Basic Usage:
+##Basic Usage
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
 ```
 {
@@ -35,3 +35,7 @@ This is **not** an application to download manga from various sources. If that's
 ```
 **``/mangapp/reader/mangakey/filekey/index``**: Retrieves the image for the manga specified by ``mangakey``, the archive specified by ``filekey``, and the index specified by ``index``.
 
+##Dependencies
+boost:  http://www.boost.org/
+libzip: http://www.nih.at/libzip/
+unrar:  http://www.rarlabs.com/rar_add.htm
