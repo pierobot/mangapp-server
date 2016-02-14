@@ -38,7 +38,27 @@ The website that uses this server is not ready yet, just the reader is left to f
 **``/mangapp/reader/mangakey/filekey/index``**: Retrieves the image for the manga specified by ``mangakey``, the archive specified by ``filekey``, and the index specified by ``index``.
 
 ##Dependencies
+icu:    http://site.icu-project.org/download </br>
 boost:  http://www.boost.org/ </br>
 zlib:   http://zlib.net/ </br>
 libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
+
+##Build instructions
+#####GNU/Linux
+Install icu, zlib, libzip, unrar, and boost if you haven't already. </br>
+```
+sudo apt-get install build-essential libicu55 libicu-dev zlib1g zlib1g-dev libzip2 libzip-dev libboost-dev
+```
+Download, build, and install the unrar library.
+```
+wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.11.tar.gz && cd unrar && make lib && sudo make install-lib
+```
+Make sure ``unrar.hpp`` and ``dll.hpp`` are in an include directory.
+This can be in either ``mangapp-server/include/unrar``, or ``/usr/local/include/unrar``.
+
+Download this project and compile. 
+```
+git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake . && make
+```
+
