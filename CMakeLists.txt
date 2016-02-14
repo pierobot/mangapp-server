@@ -42,7 +42,7 @@ IF (WIN32)
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS) 
 ELSE()
-    SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} -std=c++11 -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ENDIF()
 
 #TARGET_COMPILE_OPTIONS(${PROJECT_NAME} PUBLIC -std=c++11 -Wall)

@@ -8,7 +8,7 @@
 //#include <codecvt>
 #include <locale>
 
-#include <libzip/zip.h>
+#include <zip.h>
 
 namespace mangapp
 {
