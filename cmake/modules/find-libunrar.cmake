@@ -6,31 +6,22 @@
 #
 
 FIND_PATH(LIBUNRAR_INCLUDE_DIR rar.hpp dll.hpp
-    $ENV{LIBUNRAR_DIR}/include
     $ENV{LIBUNRAR_DIR}
-    $ENV{OSGDIR}/include
-    $ENV{OSGDIR}
-    $ENV{OSG_ROOT}/include
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local/include
-    /usr/include
-    /sw/include # Fink
-    /opt/local/include # DarwinPorts
-    /opt/csw/include # Blastwave
-    /opt/include
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/include
-    /usr/freeware/include
+    ~/Library/Frameworks/unrar
+    /Library/Frameworks/unrar
+    /usr/local/include/unrar
+    /usr/include/unrar
+    /sw/include/unrar # Fink
+    /opt/local/include/unrar # DarwinPorts
+    /opt/csw/include/unrar # Blastwave
+    /opt/include/unrar
+    /usr/freeware/include/unrar
 )
 
 FIND_LIBRARY(LIBUNRAR_LIBRARY 
     NAMES libunrar unrar
     PATHS
-    $ENV{LIBUNRAR_DIR}/lib
     $ENV{LIBUNRAR_DIR}
-    $ENV{OSGDIR}/lib
-    $ENV{OSGDIR}
-    $ENV{OSG_ROOT}/lib
     ~/Library/Frameworks
     /Library/Frameworks
     /usr/local/lib
@@ -39,7 +30,6 @@ FIND_LIBRARY(LIBUNRAR_LIBRARY
     /opt/local/lib
     /opt/csw/lib
     /opt/lib
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/lib
     /usr/freeware/lib64
 )
 
