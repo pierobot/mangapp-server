@@ -4,6 +4,8 @@ Still in development and **probably** not ready for usage. Use at your own risk.
 
 This is **not** an application to download manga from various sources. If that's what you're after, look elsewhere.
 
+The website that uses this server is not ready yet, just the reader is left to finish, but it will be available here https://github.com/pierobot/mangapp-web
+
 ##Basic Usage
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
 ```
