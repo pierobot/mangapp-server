@@ -36,6 +36,6 @@ This is **not** an application to download manga from various sources. If that's
 **``/mangapp/reader/mangakey/filekey/index``**: Retrieves the image for the manga specified by ``mangakey``, the archive specified by ``filekey``, and the index specified by ``index``.
 
 ##Dependencies
-boost:  http://www.boost.org/
-libzip: http://www.nih.at/libzip/
-unrar:  http://www.rarlabs.com/rar_add.htm
+boost:  http://www.boost.org/ </br>
+libzip: http://www.nih.at/libzip/ </br>
+unrar:  http://www.rarlabs.com/rar_add.htm </br>
