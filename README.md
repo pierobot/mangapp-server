@@ -52,11 +52,8 @@ sudo apt-get install build-essential libicu55 libicu-dev zlib1g zlib1g-dev libzi
 ```
 Download, build, and install the unrar library.
 ```
-wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.11.tar.gz && cd unrar && make lib && sudo make install-lib
+wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.11.tar.gz && cd unrar && make lib && sudo make install-lib && sudo mkdir /usr/local/include/unrar && sudo cp *.hpp /usr/local/include/unrar
 ```
-Make sure ``unrar.hpp`` and ``dll.hpp`` are in an include directory.
-This can be in either ``mangapp-server/include/unrar``, or ``/usr/local/include/unrar``.
-
 Download this project and compile. 
 ```
 git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake . && make
