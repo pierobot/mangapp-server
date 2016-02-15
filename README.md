@@ -56,6 +56,6 @@ wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.
 ```
 Download this project and compile. 
 ```
-git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake -DCMAKE_BUILD_TYPE=Release . && make
+git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake . && make
 ```
 
