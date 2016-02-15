@@ -51,9 +51,9 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "cmake/modules")
 
 # --------------------------------------------------------------
-SET(Boost_STATIC_LIBS ON)
+SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost 1.55.0 COMPONENTS locale filesystem system REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS locale filesystem system REQUIRED)
 IF (Boost_FOUND)
     INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES})
