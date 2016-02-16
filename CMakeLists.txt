@@ -42,7 +42,8 @@ IF (WIN32)
     SET(CMAKE_USE_WIN32_THREADS_INIT true)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_WARNINGS 
                     -D_CRT_SECURE_NO_WARNINGS 
-                    -D_SCL_SECURE_NO_WARNINGS) 
+                    -D_SCL_SECURE_NO_WARNINGS
+                    -DZIP_STATIC) 
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ENDIF()
