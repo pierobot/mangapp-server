@@ -45,20 +45,5 @@ libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
 
 ##Build instructions
-#####GNU/Linux
-Install icu, zlib, libzip, unrar, and boost if you haven't already. </br>
-```
-sudo apt-get install build-essential libicu55 libicu-dev zlib1g zlib1g-dev libzip2 libzip-dev libboost-dev
-```
-Download, build, and install the unrar library.
-```
-wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.11.tar.gz && cd unrar && make lib && sudo make install-lib && sudo mkdir /usr/local/include/unrar && sudo cp *.hpp /usr/local/include/unrar
-```
-Download this project and compile. 
-```
-git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake . && make
-```
-
 #####Windows
-Use the "windows" branch. </br>
 More instructions to come...
