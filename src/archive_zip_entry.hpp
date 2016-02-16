@@ -1,11 +1,8 @@
 #ifndef ARCHIVE_ZIP_ENTRY_HPP
 #define ARCHIVE_ZIP_ENTRY_HPP
 
-#define ZIP_STATIC
-
 #include "archive_entry.hpp"
 
-//#include <codecvt>
 #include <locale>
 
 #include <zip.h>
