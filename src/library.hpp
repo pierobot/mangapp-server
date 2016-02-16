@@ -14,8 +14,41 @@
 
 #include <utf8/utf8.h>
 
+#include <json11/json11.hpp>
+
 namespace base
 {
+    static std::vector<std::wstring> utf8_paths_to_utf16(std::vector<std::string> const & library_paths)
+    {
+        std::vector<std::wstring> utf16_paths;
+
+        for (auto const & path : library_paths)
+        {
+            std::wstring utf16_str;
+            utf8::utf8to16(path.cbegin(), path.cend(), std::back_inserter(utf16_str));
+
+            utf16_paths.push_back(utf16_str);
+        }
+
+        return utf16_paths;
+    }
+
+    static std::vector<std::wstring> json_to_utf16_vector(json11::Json const & library_paths)
+    {
+        std::vector<std::wstring> utf16_paths;
+
+        for (auto const & element : library_paths.array_items())
+        {
+            std::string utf8_str(element.string_value());
+            std::wstring utf16_str;
+            utf8::utf8to16(utf8_str.cbegin(), utf8_str.cend(), std::back_inserter(utf16_str));
+
+            utf16_paths.emplace_back(utf16_str);
+        }
+
+        return utf16_paths;
+    }
+
     template<class DirectoryEntryType>
     class library
     {
@@ -49,6 +82,17 @@ namespace base
                     m_entries.emplace(key, entry_type(path_str, name_str, key));
                 });
             }
+        }
+
+        library(std::vector<std::string> const & library_paths) :
+            library(utf8_paths_to_utf16(library_paths))
+        {
+        }
+
+        library(json11::Json const & library_paths) : 
+            library(json_to_utf16_vector(library_paths))
+        {
+
         }
 
         virtual ~library()
