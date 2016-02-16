@@ -59,3 +59,6 @@ Download this project and compile.
 git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cmake . && make
 ```
 
+#####Windows
+Use the "windows" branch
+More instructions to come...
