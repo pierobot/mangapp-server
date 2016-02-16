@@ -60,5 +60,4 @@ git clone https://github.com/pierobot/mangapp-server && cd mangapp-server && cma
 ```
 
 #####Windows
-Use the "windows" branch. </br>
 More instructions to come...
