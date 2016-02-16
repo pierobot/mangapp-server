@@ -18,7 +18,16 @@ namespace mangapp
     manga_library::manga_library(std::vector<std::wstring> const & library_paths) :
         library<manga_directory>(library_paths)
     {
-        std::cout << "Manga library serving a total of " << size() << " items." << std::endl;
+    }
+
+    manga_library::manga_library(std::vector<std::string> const & library_paths) : 
+        library<manga_directory>(library_paths)
+    {
+    }
+
+    manga_library::manga_library(json11::Json const & library_paths) : 
+        library<manga_directory>(library_paths)
+    {
     }
 
     manga_library::~manga_library()

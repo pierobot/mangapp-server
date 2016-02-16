@@ -29,6 +29,8 @@ namespace mangapp
         typedef base::library<manga_directory>::key_type key_type;
 
         manga_library(std::vector<std::wstring> const & library_paths);
+        manga_library(std::vector<std::string> const & library_paths);
+        manga_library(json11::Json const & library_paths);
         virtual ~manga_library();
 
         /**
