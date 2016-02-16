@@ -48,7 +48,7 @@ unrar:  http://www.rarlabs.com/rar_add.htm </br>
 #####GNU/Linux
 Install icu, zlib, libzip, unrar, and boost if you haven't already. </br>
 ```
-sudo apt-get install build-essential libicu55 libicu-dev zlib1g zlib1g-dev libzip2 libzip-dev libboost-dev
+sudo apt-get install build-essential libicu-dev zlib1g-dev libzip-dev libboost-dev
 ```
 Download, build, and install the unrar library.
 ```
