@@ -48,17 +48,14 @@ ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ENDIF()
 
-#TARGET_COMPILE_OPTIONS(${PROJECT_NAME} PUBLIC -std=c++11 -Wall)
-
-
-LIST(APPEND CMAKE_MODULE_PATH "cmake/modules")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # --------------------------------------------------------------
 SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale regex system REQUIRED)
 IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${BOOST_INCLUDE_DIR})
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES})
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to locate boost.")
