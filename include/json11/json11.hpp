@@ -56,6 +56,13 @@
 #include <memory>
 #include <initializer_list>
 
+#ifdef _MSC_VER
+    #if _MSC_VER <= 1800 // VS 2013
+        #define noexcept throw()
+        #define snprintf _snprintf
+    #endif
+#endif
+
 namespace json11 {
 
 enum JsonParse {
