@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include <json11/json11.hpp>
+
 #include <utf8/utf8.h>
 
 #include <boost/functional/hash.hpp>

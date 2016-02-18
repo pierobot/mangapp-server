@@ -9,7 +9,10 @@
 #include <string>
 #include <vector>
 
-#include <json11/json11.hpp>
+namespace json11
+{
+	class Json;
+}
 
 static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr",
                                                                 L".zip", L".cbz",
