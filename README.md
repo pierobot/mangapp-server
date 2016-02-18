@@ -55,5 +55,5 @@ unrar:  http://www.rarlabs.com/rar_add.htm </br>
 #####GNU/Linux
 https://github.com/pierobot/mangapp-server/wiki/Build-on-GNU-Linux
 
-#####Windows (VS 2013)
+#####Windows
 https://github.com/pierobot/mangapp-server/wiki/Build-on-Windows
