@@ -43,6 +43,7 @@ IF (WIN32)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_WARNINGS 
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
+                    -DCROW_MSVC_WORKAROUND
                     -DZIP_STATIC) 
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
@@ -78,7 +79,6 @@ ENDIF()
 # -------------------------------------------------------------
 FIND_PACKAGE(LibZip REQUIRED)
 IF(LIBZIP_FOUND)
-    MESSAGE(STATUS ${LIBZIP_LIBRARY})
     INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBZIP_LIBRARY})
 ELSE()
