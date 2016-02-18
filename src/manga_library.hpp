@@ -11,7 +11,7 @@
 
 namespace json11
 {
-	class Json;
+    class Json;
 }
 
 static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr",
