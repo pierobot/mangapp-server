@@ -6,6 +6,13 @@ This is **not** an application to download manga from various sources. If that's
 
 The website that uses this server is not ready yet, just the reader is left to finish, but it will be available here https://github.com/pierobot/mangapp-web
 
+##Features
+Support for the following archive formats:
+* cbz/zip
+* cbr/rar
+* cb7/7z
+
+
 ##Basic Usage
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
 ```
