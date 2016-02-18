@@ -1,5 +1,7 @@
 #include "archive_7z_entry.hpp"
 
+#include <iterator>
+
 using namespace mangapp;
 
 entry_7z::entry_7z(CSzArEx * data,

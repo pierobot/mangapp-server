@@ -1,5 +1,7 @@
 #include "archive_rar.hpp"
 
+#include <iterator>
+
 using namespace mangapp;
 
 entry_rar::entry_rar(std::wstring rar_path, 
