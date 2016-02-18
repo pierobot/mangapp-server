@@ -76,7 +76,6 @@ namespace mangapp
         std::string & erase_chunk_length(std::string & contents) const;
 
         std::string const build_request_header(std::string const & host, std::string const & url) const;
-        std::string const extract_http_content(std::string const & contents) const;
         size_t const get_header_length(std::string const & headers) const;
         size_t const get_content_length(std::string const & headers) const;
         
