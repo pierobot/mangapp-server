@@ -19,7 +19,7 @@ static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr"
                                                                 L".7z",  L".cb7" };
 
 template<class Container, class Element>
-static inline bool is_in_container(Container const & container, Element const & element)
+static bool is_in_container(Container const & container, Element const & element)
 {
     return std::find(container.cbegin(), container.cend(), element) != container.cend();
 }
@@ -43,6 +43,12 @@ namespace mangapp
         */
         json11::Json const get_list() const;
 
+        /**
+        *   Creates a JSON object of the files available for a manga.
+        *
+        *   @param key the key of the manga
+        *   @return a JSON object representing the files
+        */
         json11::Json const get_files(size_t key) const;
 
         /**
