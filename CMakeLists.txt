@@ -54,7 +54,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modu
 # --------------------------------------------------------------
 SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale regex system REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale program_options regex system REQUIRED)
 IF (Boost_FOUND)
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES})
