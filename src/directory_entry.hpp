@@ -35,7 +35,8 @@ namespace base
             std::string name_utf8;
             utf8::utf16to8(m_name.cbegin(), m_name.cend(), std::back_inserter(name_utf8));
 
-            m_json = json11::Json::array { std::to_string(m_key), name_utf8 };
+            m_json = json11::Json::object{ { "key", std::to_string(key) },
+                                           { "name", name_utf8 } };
 
             enumerate_files(path + name, file_search_flags::FlagFile, false,
                 [this, &path](std::wstring const & full_path, file_search_flags flag)
