@@ -12,6 +12,8 @@ Support for the following archive formats:
 * cbr/rar
 * cb7/7z
 
+Planned:
+* TLS/SSL (OpenSSL)
 
 ##Basic Usage
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
