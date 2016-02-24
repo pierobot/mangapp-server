@@ -49,8 +49,8 @@ namespace mangapp
         std::sort(entries.begin(), entries.end(),
             [](json11::Json const & left, json11::Json const & right) -> bool
         {
-            auto const & left_str = left.array_items()[1].string_value();
-            auto const & right_str = right.array_items()[1].string_value();
+            auto const & left_str = left["name"].string_value();
+            auto const & right_str = right["name"].string_value();
 
             return std::locale()(left_str, right_str);
         });
@@ -78,8 +78,8 @@ namespace mangapp
             std::sort(entries.begin(), entries.end(),
                 [](json11::Json const & left, json11::Json const & right) -> bool
             {
-                auto const & left_str = left.array_items()[1].string_value();
-                auto const & right_str = right.array_items()[1].string_value();
+                auto const & left_str = left["name"].string_value();
+                auto const & right_str = right["name"].string_value();
 
                 return sort::numerical_regex_less()(left_str, right_str);
             });
@@ -164,7 +164,7 @@ namespace mangapp
         }, on_error);
     }
 
-    void manga_library::get_manga_details(size_t key, std::function<void(json11::Json)> on_event)
+    void manga_library::get_manga_details(key_type key, std::function<void(json11::Json)> on_event)
     {
         // Is the key valid?
         auto manga_iterator = library::find(key);
