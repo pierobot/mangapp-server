@@ -19,7 +19,8 @@ Planned:
 **``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
 ```
 {
-  { "key": "", "name": "" }
+  { "key": "", "name": "" },
+  ...
 }
 ```
 **``/mangapp/thumbnail/key``**: Retrieves the thumbnail image, if any, for the manga specified by ``key``</br></br>
@@ -39,7 +40,6 @@ Planned:
 ```
 {
   { "key": "", "name": ""},
-  { ... }
   ...
 }
 ```
