@@ -10,7 +10,8 @@ manga_entry::manga_entry(std::wstring const & path, std::wstring const & name, s
     std::string utf8_name;
     utf8::utf16to8(name.cbegin(), name.cend(), std::back_inserter(utf8_name));
 
-    m_json = json11::Json::array{ std::to_string(key), utf8_name };
+    m_json = json11::Json::object{ { "key", std::to_string(key) }, 
+                                   { "name", utf8_name } };
 }
 
 manga_entry::~manga_entry()
