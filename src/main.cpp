@@ -2,11 +2,51 @@
 #include "server.hpp"
 
 #include <fstream>
+#include <map>
 #include <thread>
 
 #include <json11/json11.hpp>
 
 #include <boost/locale.hpp>
+#include <boost/program_options.hpp>
+
+static bool verify_arguments(boost::program_options::variables_map const & args,
+                             boost::program_options::options_description const & options)
+{
+    do
+    {
+        if (args.count("help"))
+        {
+            std::cout << options << std::endl;
+            break;
+        }
+
+        if (args.count("settings-file") == 0)
+        {
+            std::cout << "No JSON file containing library settings provided." << std::endl;
+            break;
+        }
+
+        if (args["enable-tls"].as<bool>() == true)
+        {
+            if (args.count("crt-file") == 0)
+            {
+                std::cout << "TLS/SSL enabled but no certificate file was provided." << std::endl;
+                break;
+            }
+            if (args.count("key-file") == 0)
+            {
+                std::cout << "TLS/SSL enabled but no key file was provided." << std::endl;
+                break;
+            }
+        }
+
+        return true;
+
+    } while (true);
+    
+    return false;
+}
 
 int main(int argc, char **argv)
 {
@@ -15,7 +55,23 @@ int main(int argc, char **argv)
     std::locale jp_locale(gen("ja_JP"));
     std::locale::global(jp_locale);
 
-    std::ifstream settings_file("settings.json");
+    // Set up our command line arguments
+    boost::program_options::options_description options("Supported options");
+    options.add_options()
+        ("help", "Produce help message")
+        ("settings-file", boost::program_options::value<std::string>(), "Path to a json file that contains the library settings.")
+        ("enable-tls", boost::program_options::bool_switch()->default_value(false), "Enables TLS/SSL")
+        ("crt-file", boost::program_options::value<std::string>(), "Path to the certificate file (PEM encoded).")
+        ("key-file", boost::program_options::value<std::string>(), "Path to the key file (PEM encoded).")
+        ("key-password", boost::program_options::value<std::string>(), "Password for the key file.");
+    // Parse the command line arguments
+    boost::program_options::variables_map args;
+    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, options), args);
+    // Stop execution if any parameters are invalid or we're missing any
+    if (verify_arguments(args, options) == false)
+        return 1;
+    
+    std::ifstream settings_file(args["settings-file"].as<std::string>());
     if (settings_file.good() == true)
     {
         std::string settings_str(std::istreambuf_iterator<char>(settings_file), (std::istreambuf_iterator<char>()));
