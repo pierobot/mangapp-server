@@ -4,6 +4,8 @@
 #include "manga_library.hpp"
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #ifdef _WIN32
 // Windows headers define the following and will cause compile errors if not undef'd
@@ -12,24 +14,29 @@
 #endif
 
 #include <crow/crow.h>
-#include <crow/json.h>
+#include <crow/middleware.h>
+
+#include <json11/json11.hpp>
 
 namespace mangapp
 {
     class server
     {
     public:
-        server(uint16_t port, manga_library * const lib);
+        server(uint16_t port, json11::Json const & users, manga_library * const lib);
 
         virtual ~server();
 
         void start();
-        void stop();
     protected:
     private:
-        crow::SimpleApp m_app;
+        crow::Crow<crow::CookieParser> m_app;
+        std::vector<std::string> m_sessions;
         uint16_t m_port;
+        json11::Json const & m_users;
         manga_library * m_library;
+
+        bool const is_authenticated(std::string const & session_id);
     };
 }
 
