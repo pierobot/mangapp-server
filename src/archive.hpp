@@ -26,12 +26,7 @@ namespace mangapp
 
         virtual entry_pointer operator[](size_t index) = 0;
 
-        template<class ArchiveType, class = typename std::enable_if<std::is_base_of<archive, ArchiveType>::value &&
-                                                                    std::is_constructible<ArchiveType, std::wstring const&>::value>::type>
-        static std::unique_ptr<archive> open(std::wstring const & file_path)
-        {
-            return std::move(std::unique_ptr<archive>(new ArchiveType(file_path)));
-        }
+        static std::unique_ptr<archive> open(std::wstring const & file_path);
     protected:
     private:
     };
