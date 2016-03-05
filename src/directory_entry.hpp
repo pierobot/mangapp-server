@@ -22,8 +22,8 @@ namespace base
     class directory_entry
     {
     public:
-        typedef FileEntryType entry_type;
-        typedef std::unordered_map<size_t, entry_type> map_type;
+        typedef FileEntryType file_entry_type;
+        typedef std::unordered_map<size_t, file_entry_type> map_type;
 
         typedef typename map_type::const_iterator const_iterator;
 
@@ -47,7 +47,7 @@ namespace base
                 std::wstring path_str(full_path, 0, path_end_pos + 1);
 
                 auto key = boost::hash<std::wstring>()(name_str);
-                m_files.emplace(key, entry_type(path_str, name_str, key));
+                m_files.emplace(key, file_entry_type(path_str, name_str, key));
             });
         }
 
