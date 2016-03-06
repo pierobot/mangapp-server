@@ -26,7 +26,7 @@ static bool is_in_container(Container const & container, Element const & element
 
 namespace mangapp
 {
-    class manga_library : public base::library<manga_directory>
+    class manga_library : virtual public base::library<manga_directory>
     {
     public:
         typedef manga_directory directory_type;
@@ -38,51 +38,8 @@ namespace mangapp
         manga_library(std::vector<std::string> const & library_paths);
         manga_library(json11::Json const & library_paths);
         virtual ~manga_library();
-
-        /**
-        *   Converts the manga entries to a JSON object.
-        *
-        *   @return a JSON object representing the manga entries
-        */
-        //json11::Json const get_list() const;
-
-        /**
-        *   Reads the thumbnail of a manga from its folder or from an archive.
-        *   Retrieval from an archive is NOT implemented yet.
-        *
-        *   @param key the key of the manga
-        *   @param folder indicates whether or not to retrieve from the folder or archive
-        *   @param index index of the archive in the folder
-        *   @return a string containing the thumbnail's contents
-        */
-        std::string get_thumbnail(key_type key, bool folder, uint32_t index = 0) const;
-
-        /**
-        *   Gets the details of a manga from mangaupdates.com
-        *
-        *   @param key the key of the manga
-        *   @param on_event a function object that will be called on success or failure
-        */
-        void get_manga_details(key_type key, std::function<void(mstch::map&&, bool)> on_event);
-
-        /** 
-        *   Gets the desired image from an archive.
-        *
-        *   @param key the key of the manga
-        *   @param key the key of the archive file
-        *   @param index the index of the image
-        *   @return a string containing the image's contents
-        */
-        std::string get_image(key_type key, key_type file_key, size_t index) const;
     protected:
-        /**
-        *   Asynchronously searches mangaupdates for the supplied name of the manga.
-        *   The results are stored in a mstch::map object and passed to the 'on_event' callback.
-        *
-        *   @param name the name of the manga
-        *   @param on_event a callback that handles the mstch::map object
-        */
-        void search_mangaupdates_for(std::string const & name, std::function<void(mstch::map&&, bool)> on_event);
+        virtual void search_online_source(std::string const & name, std::function<void(mstch::map&&, bool)> on_event) final;
     private:
         http_helper m_http_helper;
     };
