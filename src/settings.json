@@ -1,5 +1,10 @@
 {
-    "manga": [
+    "users": [
+		"pierobot:testpass"
+	],
+	
+	"manga": [
+	    "E:/Manga/Manga",
         "H:/Manga/Manga"
     ],
 

@@ -10,6 +10,8 @@
 #include <boost/locale.hpp>
 #include <boost/program_options.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 static bool verify_arguments(boost::program_options::variables_map const & args,
                              boost::program_options::options_description const & options)
 {
@@ -80,12 +82,13 @@ int main(int argc, char **argv)
         json11::Json settings_json = json11::Json::parse(settings_str, error_str);
         if (settings_json != nullptr)
         {
-            auto manga_settings = settings_json["manga"];
+            auto const & manga_settings = settings_json["manga"];
             mangapp::manga_library manga_library(manga_settings);
 
             std::cout << "Manga library serving a total of " << manga_library.size() << " items." << std::endl;
 
-            mangapp::server server(1234, &manga_library);
+            auto const & users_json = settings_json["users"];
+            mangapp::server server(1234, users_json, &manga_library);
             std::thread server_thread([&server]()
             {
                 server.start();
