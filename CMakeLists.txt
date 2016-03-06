@@ -38,7 +38,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES}
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} include)
 
-IF (WIN32)
+IF (MSVC)
     SET(CMAKE_USE_WIN32_THREADS_INIT true)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_WARNINGS 
                     -D_CRT_SECURE_NO_WARNINGS 
@@ -54,7 +54,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modu
 # --------------------------------------------------------------
 SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREADED ON)
-FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale program_options regex system REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale program_options random regex system REQUIRED)
 IF (Boost_FOUND)
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES})
@@ -93,4 +93,12 @@ IF(LIBUNRAR_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBUNRAR_LIBRARY})
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to locate libunrar.")
+ENDIF()
+# -------------------------------------------------------------
+FIND_PACKAGE(mstch REQUIRED)
+IF(mstch_FOUND)
+	INCLUDE_DIRECTORIES(${mstch_INCLUDE_DIR})
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} mstch::mstch)
+ELSE()
+	MESSAGE(FATAL_ERROR "Unable to locate mstch.")
 ENDIF()
