@@ -160,12 +160,12 @@ namespace base
 
         mstch::map get_files_context(key_type key) const
         {
-            auto manga_iterator = library::find(key);
-            if (manga_iterator != library::cend())
+            auto manga_comic_iterator = library::find(key);
+            if (manga_comic_iterator != library::cend())
             {
                 std::vector<std::reference_wrapper<library::file_entry_type const>> ordered;
 
-                std::for_each(manga_iterator->second.cbegin(), manga_iterator->second.cend(),
+                std::for_each(manga_comic_iterator->second.cbegin(), manga_comic_iterator->second.cend(),
                     [&ordered](library::directory_entry_type::map_type::value_type const & entry)
                 {
                     ordered.push_back(std::cref(entry.second));
@@ -200,7 +200,7 @@ namespace base
                     }
                 });
 
-                std::wstring const & utf16_name(manga_iterator->second.get_name());
+                std::wstring const & utf16_name(manga_comic_iterator->second.get_name());
                 std::string utf8_name;
                 utf8::utf16to8(utf16_name.cbegin(), utf16_name.cend(), std::back_inserter(utf8_name));
 
@@ -254,7 +254,116 @@ namespace base
             return mstch::map({});
         }
 
+        /**
+        *   Reads the thumbnail of a manga/comic from its folder or from an archive.
+        *   Retrieval from an archive is NOT implemented yet.
+        *
+        *   @param key the key of the manga/comic
+        *   @param folder indicates whether or not to retrieve from the folder or archive
+        *   @param index index of the archive in the folder
+        *   @return a string containing the thumbnail's contents
+        */
+        std::string get_thumbnail(key_type key, bool folder, uint32_t index = 0) const
+        {
+            std::string thumb_data;
+
+            auto manga_comic_iterator = find(key);
+            // Does the specified key exist in our map?
+            if (manga_comic_iterator != cend())
+            {
+                // Yes, do we want the folder's thumbnail? 
+                if (folder == true)
+                {
+                    // Yes, get the contents of "folder.jpg"
+                    size_t thumb_key = boost::hash<std::wstring>()(L"folder.jpg");
+                    auto thumb_iterator = manga_comic_iterator->second.find(thumb_key);
+                    if (thumb_iterator != manga_comic_iterator->second.cend())
+                    {
+                        thumb_data = thumb_iterator->second.contents();
+                    }
+                }
+                else
+                {
+                    // No, get the thumbnail from an archive
+
+                    // NOT IMPLEMENTED YET
+                    // NEED IMAGE RESIZE LIBRARY
+                }
+            }
+
+            return thumb_data;
+        }
+
+        /**
+        *   Gets the details of a manga/comic
+        *
+        *   @param key the key of the manga.comic
+        *   @param on_event a function object that will be called on success or failure
+        */
+        void get_details(key_type key, std::function<void(mstch::map&&, bool)> on_event)
+        {
+            // Is the key valid?
+            auto manga_comic_iterator = library::find(key);
+            if (manga_comic_iterator != library::cend())
+            {
+                // Yes, proceed
+                std::wstring const & wname = manga_comic_iterator->second.get_name();
+                std::string mbname;
+
+                // Encode the name to UTF-8
+                utf8::utf16to8(wname.cbegin(), wname.cend(), std::back_inserter(mbname));
+
+                search_online_source(mbname, on_event);
+            }
+        }
+
+        /**
+        *   Gets the desired image from an archive.
+        *
+        *   @param key the key of the manga
+        *   @param key the key of the archive file
+        *   @param index the index of the image
+        *   @return a string containing the image's contents
+        */
+        std::string get_image(key_type key, key_type file_key, size_t index) const
+        {
+            std::string image_contents;
+
+            // Is the manga key valid?
+            auto manga_comic_iterator = library::find(key);
+            if (manga_comic_iterator != library::cend())
+            {
+                // Yes. Is the file archive key valid?
+                auto archive_iterator = manga_comic_iterator->second.find(file_key);
+                if (archive_iterator != manga_comic_iterator->second.cend())
+                {
+                    auto file_path = archive_iterator->second.get_path() + archive_iterator->second.get_name();
+
+                    auto archive_ptr = mangapp::archive::open(file_path);
+                    // Make sure we have a valid archive pointer before proceeding
+                    if (archive_ptr != nullptr)
+                    {
+                        // Get the contents of the image
+                        auto image_ptr = (*archive_ptr)[index];
+                        if (image_ptr != nullptr)
+                            image_contents = image_ptr->contents();
+                    }
+                }
+            }
+
+            return image_contents;
+        }
     protected:
+        /**
+        *   Function that asynchronously searches an online source for the supplied name of the manga/comic.
+        *   The results are stored in a mstch::map object and passed to the 'on_event' callback.
+        *
+        *   @param name the name of the manga/comic
+        *   @param on_event a callback that handles the mstch::map object
+        */
+        virtual void search_online_source(std::string const & name, std::function<void(mstch::map&&, bool)> on_event)
+        {
+        }
     private:
         library_map_t m_entries;
     };

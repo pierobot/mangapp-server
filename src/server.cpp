@@ -78,6 +78,7 @@ namespace mangapp
     {
         crow::logger::setLogLevel(crow::LogLevel::CRITICAL);
 
+        // Main route
         CROW_ROUTE(m_app, "/mangapp").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request) -> crow::response
         {
@@ -99,6 +100,7 @@ namespace mangapp
             }
         });
 
+        // Route for authentication
         CROW_ROUTE(m_app, "/mangapp/login").methods(crow::HTTPMethod::POST)
             ([this](crow::request const & request) -> crow::response
         {         
@@ -125,6 +127,7 @@ namespace mangapp
             
         });
 
+        // Route for serving static web content
         CROW_ROUTE(m_app, "/mangapp/static/<string>/<string>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, std::string type_str, std::string name_str) -> crow::response
         {
@@ -139,22 +142,7 @@ namespace mangapp
                 return crow::response(404);
         });
 
-        // Route for getting the list of manga
-        //CROW_ROUTE(m_app, "/mangapp/list").methods(crow::HTTPMethod::GET)
-        //    ([this](crow::request const & request) -> crow::response
-        //{
-        //    auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
-        //    if (is_authenticated(session_id) == false)
-        //        return crow::response(401);
-
-        //    auto const mangalist_json = m_library->get_list().dump();
-        //    auto response = crow::response(mangalist_json);
-        //    response.set_header("Content-Type", "application/json");
-
-        //    return response;
-        //});
-
-        // Route for getting the thumbnail of a manga
+        // Route for getting the thumbnail of a manga/comic
         CROW_ROUTE(m_app, "/mangapp/thumbnail/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, size_t key) -> crow::response
         {
@@ -171,7 +159,7 @@ namespace mangapp
             return crow::response(thumbnail_data);
         });
 
-        // Route for retrieving mangaupdates details for a manga
+        // Route for getting the details page for a manga/comic
         CROW_ROUTE(m_app, "/mangapp/details/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, crow::response & response, size_t key) -> void
         {
@@ -183,7 +171,7 @@ namespace mangapp
                 return;
             }
 
-            m_library->get_manga_details(key,
+            m_library->get_details(key,
                 [this, &response, key](mstch::map && context, bool success) -> void
             {
                 if (response.is_alive() == true)
@@ -205,41 +193,9 @@ namespace mangapp
                     response.end();
                 }
             });
-
-            //m_library->get_manga_details(key,
-            //    [this, &response](json11::Json const & json) -> void
-            //{
-            //    // Ensure the response is still valid
-            //    if (response.is_alive() == true)
-            //    {
-            //        response.set_header("Content-Type", "application/json");
-            //        // Write our JSON data and signal that we have finished writing the response so it can be sent
-            //        response.write(json.dump());
-            //        response.end();
-            //    }
-            //});
         });
 
-        // Route for getting the files of a manga
-        //CROW_ROUTE(m_app, "/mangapp/files/<uint>").methods(crow::HTTPMethod::GET)
-        //    ([this](crow::request const & request, size_t key) -> crow::response
-        //{
-        //    auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
-        //    if (is_authenticated(session_id) == false)
-        //        return crow::response(401);
-
-        //    auto const files_json = m_library->get_files(key);
-        //    if (files_json.array_items().size() > 0)
-        //    {
-        //        auto response = crow::response(files_json.dump());
-        //        response.set_header("Content-Type", "application/json");
-        //        return response;
-        //    }
-        //    else
-        //        return crow::response(404);
-        //});
-        //}); 
-
+        // Route for getting the reader page for a manga/comic archive
         CROW_ROUTE(m_app, "/mangapp/reader/<uint>/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, size_t manga_key, size_t file_key) -> crow::response
         {
