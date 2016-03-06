@@ -182,7 +182,7 @@ namespace mangapp
                 response.end();
                 return;
             }
-          
+
             m_library->get_manga_details(key,
                 [this, &response, key](mstch::map && context, bool success) -> void
             {

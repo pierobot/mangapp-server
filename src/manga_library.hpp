@@ -29,7 +29,10 @@ namespace mangapp
     class manga_library : public base::library<manga_directory>
     {
     public:
-        typedef base::library<manga_directory>::key_type key_type;
+        typedef manga_directory directory_type;
+        typedef manga_entry file_entry_type;
+
+        typedef base::library<directory_type>::key_type key_type;
 
         manga_library(std::vector<std::wstring> const & library_paths);
         manga_library(std::vector<std::string> const & library_paths);
@@ -41,15 +44,7 @@ namespace mangapp
         *
         *   @return a JSON object representing the manga entries
         */
-        json11::Json const get_list() const;
-
-        /**
-        *   Creates a JSON object of the files available for a manga.
-        *
-        *   @param key the key of the manga
-        *   @return a JSON object representing the files
-        */
-        json11::Json const get_files(size_t key) const;
+        //json11::Json const get_list() const;
 
         /**
         *   Reads the thumbnail of a manga from its folder or from an archive.
@@ -68,7 +63,7 @@ namespace mangapp
         *   @param key the key of the manga
         *   @param on_event a function object that will be called on success or failure
         */
-        void get_manga_details(key_type key, std::function<void(json11::Json)> on_event);
+        void get_manga_details(key_type key, std::function<void(mstch::map&&, bool)> on_event);
 
         /** 
         *   Gets the desired image from an archive.
@@ -82,12 +77,12 @@ namespace mangapp
     protected:
         /**
         *   Asynchronously searches mangaupdates for the supplied name of the manga.
-        *   The results are stored in a JSON object and passed to the 'on_event' callback.
+        *   The results are stored in a mstch::map object and passed to the 'on_event' callback.
         *
         *   @param name the name of the manga
-        *   @param on_event a callback that handles the JSON object
+        *   @param on_event a callback that handles the mstch::map object
         */
-        void search_mangaupdates_for(std::string const & name, std::function<void(json11::Json)> on_event);
+        void search_mangaupdates_for(std::string const & name, std::function<void(mstch::map&&, bool)> on_event);
     private:
         http_helper m_http_helper;
     };
