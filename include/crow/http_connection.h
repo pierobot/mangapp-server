@@ -420,7 +420,7 @@ namespace crow
             }
             if (add_keep_alive_)
             {
-                static std::string keep_alive_tag = "Connetion: Keep-Alive";
+                static std::string keep_alive_tag = "Connection: Keep-Alive";
                 buffers_.emplace_back(keep_alive_tag.data(), keep_alive_tag.size());
                 buffers_.emplace_back(crlf.data(), crlf.size());
             }
@@ -430,7 +430,6 @@ namespace crow
             buffers_.emplace_back(res_body_copy_.data(), res_body_copy_.size());
 
             do_write();
-            res.clear();
 
             if (need_to_start_read_after_complete_)
             {
@@ -488,6 +487,7 @@ namespace crow
                 [&](const boost::system::error_code& ec, std::size_t bytes_transferred)
                 {
                     is_writing = false;
+                    res.clear();
                     res_body_copy_.clear();
                     if (!ec)
                     {
