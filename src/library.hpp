@@ -57,9 +57,14 @@ namespace base
 
         static std::vector<std::wstring> const g_image_extensions = { L".jpg", L".jpeg", L".png" };
 
-        bool is_image_extension(std::wstring const & extension)
+        static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr",
+                                                                        L".zip", L".cbz",
+                                                                        L".7z",  L".cb7" };
+
+        template<class Container, class Element>
+        static bool is_in_container(Container const & container, Element const & element)
         {
-            return std::find(g_image_extensions.cbegin(), g_image_extensions.cend(), extension) != g_image_extensions.cend();
+            return std::find(container.cbegin(), container.cend(), element) != container.cend();
         }
     }
 
@@ -77,7 +82,7 @@ namespace base
         /**
         *  Constructor for the library. Multiple paths can be parsed.
         *
-        *  @param a vector containing the file path(s)
+        *  @param library_paths a vector containing the file path(s)
         */
         library(std::vector<std::wstring> const & library_paths) :
             m_entries()
@@ -176,7 +181,7 @@ namespace base
                 std::vector<std::reference_wrapper<library::file_entry_type const>> ordered;
 
                 std::for_each(manga_comic_iterator->second.cbegin(), manga_comic_iterator->second.cend(),
-                    [&ordered](library::directory_entry_type::map_type::value_type const & entry)
+                    [&ordered](typename library::directory_entry_type::map_type::value_type const & entry)
                 {
                     ordered.push_back(std::cref(entry.second));
                 });
@@ -242,7 +247,7 @@ namespace base
                         uint32_t image_count = 0;
                         for (auto const & image_entry : *archive_ptr)
                         {
-                            if (is_image_extension(image_entry->extension()) == false)
+                            if (is_in_container(g_image_extensions, image_entry->extension()) == false)
                                 continue;
 
                             ++image_count;
