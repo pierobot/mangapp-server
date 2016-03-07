@@ -44,9 +44,11 @@ IF (MSVC)
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
                     -DCROW_MSVC_WORKAROUND
-                    -DZIP_STATIC) 
+                    -DZIP_STATIC)
+	SET(Boost_USE_STATIC_LIBS ON)
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+	SET(Boost_USE_STATIC_LIBS OFF)
 ENDIF()
 
 ADD_DEFINITIONS(-DCROW_ENABLE_SSL)
@@ -54,7 +56,6 @@ ADD_DEFINITIONS(-DCROW_ENABLE_SSL)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
 # --------------------------------------------------------------
-SET(Boost_USE_STATIC_LIBS ON)
 SET(Boost_USE_MULTITHREADED ON)
 FIND_PACKAGE(Boost COMPONENTS date_time filesystem locale program_options random regex system REQUIRED)
 IF (Boost_FOUND)
