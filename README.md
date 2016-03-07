@@ -15,36 +15,6 @@ Support for the following archive formats:
 Planned:
 * TLS/SSL (OpenSSL)
 
-##Basic Usage
-**``/mangapp/list``**: Retrieves a list of the available manga in the following JSON format:</br>
-```
-{
-  { "key": "", "name": "" },
-  ...
-}
-```
-**``/mangapp/thumbnail/key``**: Retrieves the thumbnail image, if any, for the manga specified by ``key``</br></br>
-**``/mangapp/details/key``**: Retrieves the details of the manga specified by ``key`` in the following JSON format:</br>
-```
-{
-  "Result": "",
-  "Id": "",
-  "AssociatedNames": [ "" ],
-  "Genres": [ "" ],
-  "Authors": [ "" ],
-  "Artists": [ "" ],
-  "Year": "" 
-}
-```
-**``/mangapp/files/key``**: Retrieves the available files, if any, for the manga specified by ``key`` in the following JSON format: </br>
-```
-{
-  { "key": "", "name": ""},
-  ...
-}
-```
-**``/mangapp/reader/mangakey/filekey/index``**: Retrieves the image for the manga specified by ``mangakey``, the archive specified by ``filekey``, and the index specified by ``index``.
-
 ##Dependencies
 icu:    http://site.icu-project.org/download </br>
 boost:  http://www.boost.org/ </br>
