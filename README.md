@@ -12,8 +12,8 @@ Support for the following archive formats:
 * cbr/rar
 * cb7/7z
 
-Planned:
-* TLS/SSL (OpenSSL)
+TLS/SSL (OpenSSL)
+
 
 ##Dependencies
 icu:    http://site.icu-project.org/download </br>
