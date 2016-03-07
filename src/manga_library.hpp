@@ -14,16 +14,6 @@ namespace json11
     class Json;
 }
 
-static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr",
-                                                                L".zip", L".cbz",
-                                                                L".7z",  L".cb7" };
-
-template<class Container, class Element>
-static bool is_in_container(Container const & container, Element const & element)
-{
-    return std::find(container.cbegin(), container.cend(), element) != container.cend();
-}
-
 namespace mangapp
 {
     class manga_library : virtual public base::library<manga_directory>
