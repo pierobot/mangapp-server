@@ -1,0 +1,41 @@
+.container {
+    width: 1200px;
+    min-width: 1200px;
+
+    box-shadow: 0 0 10px #ddd;
+}
+
+.navbar {
+    margin-bottom: 0px;
+}
+
+.col-lg-2.col-md-3.col-xs-3 {
+    margin: 0px;
+    padding: 0px;
+    max-width: 200px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.center-text {
+    text-align: center;
+    display: inline-block;
+}
+
+.hidden {
+    display: none;
+}
+
+.thumbnail > img{
+    width: 128px;
+    height: 180px;
+}
+
+.text-overflow {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
