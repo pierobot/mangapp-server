@@ -44,11 +44,12 @@ IF (MSVC)
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
                     -DCROW_MSVC_WORKAROUND
-					-DCROW_ENABLE_SSL
                     -DZIP_STATIC) 
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 ENDIF()
+
+ADD_DEFINITIONS(-DCROW_ENABLE_SSL)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
