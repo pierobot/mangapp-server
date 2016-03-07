@@ -10,5 +10,10 @@
 
     "comic": [ 
 
-    ]
+    ],
+	
+	"tls/ssl": {
+        "crt-file": "../src/mangapp-crt.pem",
+        "key-file": "../src/mangapp-key.pem"	
+	}
 }

@@ -44,6 +44,7 @@ IF (MSVC)
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
                     -DCROW_MSVC_WORKAROUND
+					-DCROW_ENABLE_SSL
                     -DZIP_STATIC) 
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
@@ -84,8 +85,6 @@ IF(LIBZIP_FOUND)
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to locate libzip.")
 ENDIF()
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME})
 # -------------------------------------------------------------
 FIND_PACKAGE(LibUnRAR REQUIRED)
 IF(LIBUNRAR_FOUND)
@@ -102,3 +101,13 @@ IF(mstch_FOUND)
 ELSE()
 	MESSAGE(FATAL_ERROR "Unable to locate mstch.")
 ENDIF()
+#--------------------------------------------------------------
+FIND_PACKAGE(OpenSSL REQUIRED)
+IF(OPENSSL_FOUND)
+	INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENSSL_LIBRARIES})
+ELSE()
+	MESSAGE(FATAL_ERROR "Unable to locate OpenSSL.")
+ENDIF()
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME})

@@ -33,6 +33,8 @@ namespace
         return parameters;
     }
 
+    static std::string const session_cookie_str = "session_id";
+
     std::string const generate_session_id()
     {
         std::string session_id;
@@ -69,9 +71,10 @@ namespace
 
 namespace mangapp
 {
-    server::server(uint16_t port, json11::Json const & users, manga_library * const lib) :
+    server::server(uint16_t port, json11::Json const & json_settings, manga_library * const lib) :
         m_port(port),
-        m_users(users),
+        m_users(json_settings["users"]),
+        m_tls_ssl(json_settings["tls/ssl"]),
         m_library(lib),
         m_app(),
         m_sessions()
@@ -82,7 +85,8 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto s = request.get_header_value("id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
 
             if (is_authenticated(session_id) == false)
             {
@@ -117,7 +121,7 @@ namespace mangapp
             if (authenticated == true)
             {
                 auto session_id = generate_session_id();
-                m_app.get_context<crow::CookieParser>(request).set_cookie("session_id", session_id);
+                m_app.get_context<crow::CookieParser>(request).set_cookie(session_cookie_str, session_id);
                 m_sessions.emplace_back(session_id);
 
                 return crow::response(200);
@@ -131,7 +135,7 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/static/<string>/<string>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, std::string type_str, std::string name_str) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
@@ -146,7 +150,7 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/thumbnail/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, size_t key) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
@@ -163,7 +167,7 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/details/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, crow::response & response, size_t key) -> void
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (is_authenticated(session_id) == false)
             {
                 response.code = 401;
@@ -199,7 +203,7 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/reader/<uint>/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, size_t manga_key, size_t file_key) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
@@ -213,7 +217,7 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/image/<uint>/<uint>/<uint>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, size_t manga_key, size_t file_key, size_t index) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie("session_id");
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
@@ -235,7 +239,15 @@ namespace mangapp
 
     void server::start()
     {
-        m_app.port(m_port).name("Mangapp/0.1").multithreaded().run();
+        auto const & crt_file = m_tls_ssl["crt-file"].string_value();
+        auto const & key_file = m_tls_ssl["key-file"].string_value();
+
+        crow::ssl_context_t ssl_context(crow::ssl_context_t::sslv23);
+
+        ssl_context.use_certificate_file(crt_file, crow::ssl_context_t::file_format::pem);
+        ssl_context.use_rsa_private_key_file(key_file, crow::ssl_context_t::file_format::pem);
+
+        m_app.port(m_port).name("Mangapp/0.1").ssl(std::move(ssl_context)).multithreaded().run();
     }
 
     bool const server::is_authenticated(std::string const & session_id)
