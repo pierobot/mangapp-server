@@ -1,8 +1,4 @@
-﻿#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
-#include "manga_library.hpp"
+﻿#include "manga_library.hpp"
 #include "server.hpp"
 
 #include <fstream>
@@ -56,7 +52,7 @@ static bool verify_arguments(boost::program_options::variables_map const & args,
 
 int main(int argc, char **argv)
 {
-    {boost::locale::generator gen;
+    boost::locale::generator gen;
 
     std::locale jp_locale(gen("ja_JP"));
     std::locale::global(jp_locale);
@@ -76,7 +72,7 @@ int main(int argc, char **argv)
     // Stop execution if any parameters are invalid or we're missing any
     if (verify_arguments(args, options) == false)
         return 1;
-
+    
     std::ifstream settings_file(args["settings-file"].as<std::string>());
     if (settings_file.good() == true)
     {
@@ -98,26 +94,13 @@ int main(int argc, char **argv)
                 server.start();
             });
 
-            std::string input;
-            
-            do 
-            {
-                std::cin >> input;
-
-                if (input == "exit")
-                    break;
-                
-            } while (true);
-
-            //server_thread.join();
+            server_thread.join();
         }
         else
             std::cout << "Unable to parse settings. Reason: " << error_str << std::endl;
     }
     else
-        std::cout << "Unable to open settings.json" << std::endl; }
-
-    _CrtDumpMemoryLeaks();
+        std::cout << "Unable to open settings.json" << std::endl;
 
     return 0;
 }
