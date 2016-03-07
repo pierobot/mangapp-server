@@ -22,35 +22,45 @@
 
 namespace base
 {
-    static std::vector<std::wstring> utf8_paths_to_utf16(std::vector<std::string> const & library_paths)
+    namespace
     {
-        std::vector<std::wstring> utf16_paths;
-
-        for (auto const & path : library_paths)
+        std::vector<std::wstring> utf8_paths_to_utf16(std::vector<std::string> const & library_paths)
         {
-            std::wstring utf16_str;
-            utf8::utf8to16(path.cbegin(), path.cend(), std::back_inserter(utf16_str));
+            std::vector<std::wstring> utf16_paths;
 
-            utf16_paths.push_back(utf16_str);
+            for (auto const & path : library_paths)
+            {
+                std::wstring utf16_str;
+                utf8::utf8to16(path.cbegin(), path.cend(), std::back_inserter(utf16_str));
+
+                utf16_paths.push_back(utf16_str);
+            }
+
+            return utf16_paths;
         }
 
-        return utf16_paths;
-    }
-
-    static std::vector<std::wstring> json_to_utf16_vector(json11::Json const & library_paths)
-    {
-        std::vector<std::wstring> utf16_paths;
-
-        for (auto const & element : library_paths.array_items())
+        std::vector<std::wstring> json_to_utf16_vector(json11::Json const & library_paths)
         {
-            std::string utf8_str(element.string_value());
-            std::wstring utf16_str;
-            utf8::utf8to16(utf8_str.cbegin(), utf8_str.cend(), std::back_inserter(utf16_str));
+            std::vector<std::wstring> utf16_paths;
 
-            utf16_paths.emplace_back(utf16_str);
+            for (auto const & element : library_paths.array_items())
+            {
+                std::string utf8_str(element.string_value());
+                std::wstring utf16_str;
+                utf8::utf8to16(utf8_str.cbegin(), utf8_str.cend(), std::back_inserter(utf16_str));
+
+                utf16_paths.emplace_back(utf16_str);
+            }
+
+            return utf16_paths;
         }
 
-        return utf16_paths;
+        static std::vector<std::wstring> const g_image_extensions = { L".jpg", L".jpeg", L".png" };
+
+        bool is_image_extension(std::wstring const & extension)
+        {
+            return std::find(g_image_extensions.cbegin(), g_image_extensions.cend(), extension) != g_image_extensions.cend();
+        }
     }
 
     template<class DirectoryEntryType>
@@ -229,9 +239,13 @@ namespace base
                     if (archive_ptr != nullptr)
                     {
                         mstch::array image_array;
-
+                        uint32_t image_count = 0;
                         for (auto const & image_entry : *archive_ptr)
                         {
+                            if (is_image_extension(image_entry->extension()) == false)
+                                continue;
+
+                            ++image_count;
                             image_array.emplace_back(mstch::map({
                                 { "key", std::to_string(key) },
                                 { "file-key", std::to_string(file_key) },
@@ -245,6 +259,7 @@ namespace base
 
                         return mstch::map({
                             { "name", utf8_name },
+                            { "image-count", std::to_string(image_count) },
                             { "image-list", image_array }
                         });
                     }

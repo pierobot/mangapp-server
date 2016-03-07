@@ -17,6 +17,7 @@ namespace mangapp
         virtual uint64_t index() const = 0;
         virtual uint64_t size() const = 0;
         virtual std::wstring name() const = 0;
+        virtual std::wstring extension() const = 0;
         virtual bool is_dir() const = 0;
     protected:
     private:

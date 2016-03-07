@@ -47,6 +47,19 @@ namespace mangapp
             return m_name;
         }
 
+        virtual std::wstring extension() const final
+        {
+            std::wstring extension_str;
+
+            auto extension_start_pos = m_name.rfind(L'.');
+            if (extension_start_pos != std::string::npos)
+            {
+                extension_str = m_name.substr(extension_start_pos);
+            }
+
+            return extension_str;
+        }
+
         virtual bool is_dir() const final
         {
             return SzArEx_IsDir(m_data, m_index) != 0;
