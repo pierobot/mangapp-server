@@ -23,7 +23,7 @@ namespace mangapp
     class server
     {
     public:
-        server(uint16_t port, json11::Json const & users, manga_library * const lib);
+        server(uint16_t port, json11::Json const & json_settings, manga_library * const lib);
 
         virtual ~server();
 
@@ -34,6 +34,7 @@ namespace mangapp
         std::vector<std::string> m_sessions;
         uint16_t m_port;
         json11::Json const & m_users;
+        json11::Json const & m_tls_ssl;
         manga_library * m_library;
 
         bool const is_authenticated(std::string const & session_id);

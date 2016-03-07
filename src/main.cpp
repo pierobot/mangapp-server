@@ -29,20 +29,6 @@ static bool verify_arguments(boost::program_options::variables_map const & args,
             break;
         }
 
-        if (args["enable-tls"].as<bool>() == true)
-        {
-            if (args.count("crt-file") == 0)
-            {
-                std::cout << "TLS/SSL enabled but no certificate file was provided." << std::endl;
-                break;
-            }
-            if (args.count("key-file") == 0)
-            {
-                std::cout << "TLS/SSL enabled but no key file was provided." << std::endl;
-                break;
-            }
-        }
-
         return true;
 
     } while (true);
@@ -87,8 +73,7 @@ int main(int argc, char **argv)
 
             std::cout << "Manga library serving a total of " << manga_library.size() << " items." << std::endl;
 
-            auto const & users_json = settings_json["users"];
-            mangapp::server server(1234, users_json, &manga_library);
+            mangapp::server server(1234, settings_json, &manga_library);
             std::thread server_thread([&server]()
             {
                 server.start();
