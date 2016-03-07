@@ -1,0 +1,29 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>mangapp</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 col-md-offset-4">
+                <form action="/mangapp/login" method="POST" style="box-sizing: border-box">
+                    <div class="form-group">
+                        <label for="user-input">Username</label>
+                        <input class="form-control" id="user-input" name="username" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password-input">Password</label>
+                        <input class="form-control" id="password-input" name="password" placeholder="Password">
+                    </div>
+
+                    <button type="submit" class="btn btn-default">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>mangapp :: {{name}}</title>
+
+    <!-- Bootstrap core CSS -->
+    <script src="http://code.jquery.com/jquery-2.2.1.min.js" type="text/javascript"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+
+    <!-- Our core CSS and JS -->
+    <link href="/mangapp/static/css/common.css" rel="stylesheet">
+    <script src="/mangapp/static/js/details.js" type="text/javascript"></script>
+</head>
+
+<div class="container">
+    <div class="navbar navbar-inverse navbar-static-top">
+        <div class="navbar-header">
+            <b class="navbar-brand" href="#">Mangapp</b>
+        </div>
+    </div>
+
+    <div class="panel panel-default center-text">
+        <div class="panel-heading"><h4>{{name}}</h4></div>
+
+        <img id="thumbnail-img" src="/mangapp/thumbnail/{{key}}">
+
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#description-content" data-toggle="tab">Description</a></li>
+            <li><a href="#files-content" data-toggle="tab">Files <span id="file-count" class="badge">{{file-count}}</span></a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="description-content" class="tab-pane active">
+                <ul id="list-description" class="list-group">
+                    <div>
+                        <div id="assoc-names" class="list-group-item">
+                            <b>Associated Names:</b>
+                            {{#names-list}}
+                            <h8>{{name}},</h8>
+                            {{/names-list}}
+                        </div>
+                        <div id="author" class="list-group-item">
+                            <b>Author(s):</b>
+                            {{#authors-list}}
+                            <h8>{{author}},</h8>
+                            {{/authors-list}}
+                        </div>
+                        <div id="artist" class="list-group-item">
+                            <b>Artist(s):</b>
+                            {{#artists-list}}
+                            <h8>{{artist}},</h8>
+                            {{/artists-list}}
+                        </div>
+                        <div id="year" class="list-group-item">
+                            <b>Year:</b>
+                            <h8>{{year}}</h8>
+                        </div>
+                        <div id="genres" class="list-group-item">
+                            <b>Genre(s):</b>
+                            {{#genres-list}}
+                            <h8>{{genre}},</h8>
+                            {{/genres-list}}
+                        </div>
+                    </div>
+                </ul>
+            </div>
+            <div id="files-content" class="tab-pane">
+                <ul id="list-files" class="list-group scrollable-list">
+                    {{#files-list}}
+                    <li class="list-group-item">
+                        <a href="/mangapp/reader/{{key}}/{{file-key}}">{{file-name}}</a>
+                    </li>
+                    {{/files-list}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    decode_html_entities();
+</script>
+
+</body>
+
+</html>
