@@ -15,15 +15,15 @@ namespace mangapp
             
             if (extension == L".zip" || extension == L".cbz")
             {
-                return std::unique_ptr<archive>(new archive_zip(file_path));
+                return std::make_unique<archive_zip>(file_path);
             }
             else if (extension == L".rar" || extension == L".cbr")
             {
-                return std::unique_ptr<archive>(new archive_rar(file_path));
+                return std::make_unique<archive_rar>(file_path);
             }
             else if (extension == L".7z" || extension == L".cb7")
             {
-                return std::unique_ptr<archive>(new archive_7z(file_path));
+                return std::make_unique<archive_7z>(file_path);
             }
         }
        
