@@ -5,28 +5,27 @@ function list_initialize_events() {
 	
 	if (manga_list != null) {
 		// Setup the div's onclick events
-		var div = manga_list.firstElementChild;
-		while (div != null) {
-			div.onclick = function (e) {
+		var li = manga_list.firstElementChild;
+		while (li != null) {
+			li.onclick = function (e) {
 				window.open("/mangapp/details/" + this.id, "_blank");
 			};
 
 			// Setup the list item's mouse events to get pretty colors :^)
-			//var li = div.firstElementChild;
-			div.onmouseover = function(e) {
+			li.onmouseover = function(e) {
 				this.setAttribute("style", "background-color: #e9e9e9");
 			};
-			div.onmouseout = function(e) {
+			li.onmouseout = function(e) {
 				this.setAttribute("style", "background-color: #ffffff");
 			};
-			div.onmousedown = function(e) {
+			li.onmousedown = function(e) {
 				this.setAttribute("style", "background-color: #265a88");
 			};
-			div.onmouseup = function(e) {
+			li.onmouseup = function(e) {
 				this.setAttribute("style", "background-color: #ffffff");
 			};
 
-			div = div.nextElementSibling;
+			li = div.nextElementSibling;
 		}
 	}
 }

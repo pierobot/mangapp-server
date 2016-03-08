@@ -34,12 +34,10 @@
             <ul id="list-manga" class="list-group thumbnails">
                 <!-- Manga thumbnails and names will be dynamically added here. -->
                 {{#library-list}}
-                <!--<div class="col-xs-12 col-sm-6 col-lg-8" id="{{key}}">-->
                     <li class="list-group-item thumbnail text-overflow clickable col-xs-12 col-sm-6 col-lg-8" id="{{key}}">
                         <img class=thumbnail" src="/mangapp/thumbnail/{{key}}" id="thumb-{{key}}">
                         <b>{{name}}</b>
                     </li>
-                <!--</div>-->
                 {{/library-list}}
             </ul>
         </div>
