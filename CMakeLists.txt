@@ -10,7 +10,39 @@ SET(${PROJECT_NAME}_MAJOR_VERSION 0)
 SET(${PROJECT_NAME}_MINOR_VERSION 1)
 SET(${PROJECT_NAME}_PATCH_VERSION 0)
 
-FILE(GLOB SERVER_SOURCES src/*.cpp src/*.hpp)
+FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
+                         src/archive_entry.cpp src/archive_entry.hpp
+                         
+                         src/archive_7z.cpp src/archive_7z.hpp
+                         src/archive_7z_entry.cpp src/archive_7z_entry.hpp
+                         
+                         src/archive_rar.cpp src/archive_rar.hpp
+                         src/archive_rar_entry.cpp src/archive_rar_entry.hpp
+                         
+                         src/archive_zip.cpp src/archive_zip.hpp
+                         src/archive_zip_entry.cpp src/archive_zip_entry.hpp
+                         
+                         src/directory_entry.hpp
+                         src/directory_file_entry.cpp src/directory_file_entry.hpp
+                         src/file_enumeration.hpp
+                         
+                         src/http_helper.cpp src/http_helper.hpp
+                         src/http_utility.cpp src/http_utility.hpp
+                         
+                         src/library.hpp
+                         src/main.cpp
+                         
+                         src/manga_directory_entry.cpp src/manga_directory_entry.hpp
+                         src/manga_entry.cpp src/manga_entry.hpp
+                         src/manga_library.cpp src/manga_library.hpp
+                         
+                         src/mangaupdates_parser.cpp src/mangaupdates_parser.hpp
+                         
+                         src/server.cpp src/server.hpp
+                         src/sort.hpp
+                         
+                         src/utf8.cpp src/utf8.hpp)
+
 FILE(GLOB JSON11_SOURCES include/json11/json11.cpp include/json11/json11.h)
 FILE(GLOB 7Z_SOURCES include/7z/7zAlloc.c
                      include/7z/7zBuf.c
