@@ -47,11 +47,7 @@ int main(int argc, char **argv)
     boost::program_options::options_description options("Supported options");
     options.add_options()
         ("help", "Produce help message")
-        ("settings-file", boost::program_options::value<std::string>(), "Path to a json file that contains the library settings.")
-        ("enable-tls", boost::program_options::bool_switch()->default_value(false), "Enables TLS/SSL")
-        ("crt-file", boost::program_options::value<std::string>(), "Path to the certificate file (PEM encoded).")
-        ("key-file", boost::program_options::value<std::string>(), "Path to the key file (PEM encoded).")
-        ("key-password", boost::program_options::value<std::string>(), "Password for the key file.");
+        ("settings-file", boost::program_options::value<std::string>(), "Path to a json file that contains the library settings.");
     // Parse the command line arguments
     boost::program_options::variables_map args;
     boost::program_options::store(boost::program_options::parse_command_line(argc, argv, options), args);
