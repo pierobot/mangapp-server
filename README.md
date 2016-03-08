@@ -19,6 +19,7 @@ boost:  http://www.boost.org/ </br>
 zlib:   http://zlib.net/ </br>
 libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
+mstch:  https://github.com/no1msd/mstch </br>
 
 ##Build instructions
 #####GNU/Linux
