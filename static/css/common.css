@@ -1,11 +1,12 @@
 .container {
     width: 1200px;
     min-width: 1200px;
-
+    padding: 0px;
     box-shadow: 0 0 10px #ddd;
 }
 
 .navbar {
+    height: 25px;
     margin-bottom: 0px;
 }
 
