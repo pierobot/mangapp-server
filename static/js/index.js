@@ -12,17 +12,17 @@ function list_initialize_events() {
 			};
 
 			// Setup the list item's mouse events to get pretty colors :^)
-			var li = div.firstElementChild;
-			li.onmouseover = function(e) {
+			//var li = div.firstElementChild;
+			div.onmouseover = function(e) {
 				this.setAttribute("style", "background-color: #e9e9e9");
 			};
-			li.onmouseout = function(e) {
+			div.onmouseout = function(e) {
 				this.setAttribute("style", "background-color: #ffffff");
 			};
-			li.onmousedown = function(e) {
+			div.onmousedown = function(e) {
 				this.setAttribute("style", "background-color: #265a88");
 			};
-			li.onmouseup = function(e) {
+			div.onmouseup = function(e) {
 				this.setAttribute("style", "background-color: #ffffff");
 			};
 
