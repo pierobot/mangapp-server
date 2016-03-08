@@ -22,12 +22,13 @@ function reader_onload() {
 		var img = document.createElement("img");
 		img.setAttribute("src", image_array[current_index]);
 		img.setAttribute("id", "img-current");
+		img.onload = function() {
+			window.scrollTo(document.body.scrollHeight, 0);
+		};
 
 		var div_current_image =document.getElementById("current-image");
 		div_current_image.appendChild(img);
 	}
-
-	window.scrollTo(0,document.body.scrollHeight);
 }
 
 function next_image() {
