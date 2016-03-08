@@ -12,27 +12,6 @@
 
 namespace
 {
-    std::map<std::string, std::string> const parse_parameters(std::string const & contents)
-    {
-        std::vector<std::string> tokens;
-        std::map<std::string, std::string> parameters;
-
-        boost::split(tokens, contents, boost::is_any_of("&"));
-        for (auto const & token : tokens)
-        {
-            auto key_end_pos = token.find('=');
-            if (key_end_pos == std::string::npos)
-                break;
-
-            auto key = token.substr(0, key_end_pos);
-            auto value = token.substr(key_end_pos + 1);
-
-            parameters[key] = value;
-        }
-
-        return parameters;
-    }
-
     static std::string const session_cookie_str = "session_id";
 
     std::string const generate_session_id()
@@ -105,13 +84,15 @@ namespace mangapp
         });
 
         // Route for authentication
-        CROW_ROUTE(m_app, "/mangapp/login").methods(crow::HTTPMethod::POST)
+        CROW_ROUTE(m_app, "/mangapp/login").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request) -> crow::response
         {         
             auto const & users_array = m_users.array_items();
-            auto parameters(parse_parameters(request.body));
+            
+            std::string username(request.url_params.get("username"));
+            std::string password(request.url_params.get("password"));
+            std::string user_password(username + ":" + password);
 
-            std::string user_password = parameters["username"] + ":" + parameters["password"];
             bool authenticated = std::any_of(users_array.cbegin(), users_array.cend(),
                 [&user_password](json11::Json const & json) -> bool
             {
@@ -135,10 +116,6 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp/static/<string>/<string>").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request, std::string type_str, std::string name_str) -> crow::response
         {
-            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
-            if (is_authenticated(session_id) == false)
-                return crow::response(401);
-
             auto file_contents(read_file_contents(std::string("../static/") + type_str + "/" + name_str));
             if (file_contents.empty() != true)
                 return crow::response(file_contents);
