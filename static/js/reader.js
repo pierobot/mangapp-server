@@ -31,9 +31,12 @@ function reader_onload() {
 }
 
 function next_image() {
-	if (current_index + 1 <= image_array.length) {
+	if (current_index + 1 < image_array.length) {
 		var image_current = document.getElementById("img-current");
 		image_current.setAttribute("src", image_array[++current_index]);
+
+		var file_index = document.getElementById("file-index");
+		file_index.innerText = parseInt(file_index.innerText) + 1;
 	}
 }
 
@@ -41,5 +44,8 @@ function prev_image() {
 	if (current_index - 1 >= 0) {
 		var image_current = document.getElementById("img-current");
 		image_current.setAttribute("src", image_array[--current_index]);
+
+		var file_index = document.getElementById("file-index");
+		file_index.innerText = parseInt(file_index.innerText) - 1;
 	}
 }
