@@ -8,79 +8,82 @@
 
 #include <utf8/utf8.h>
 
-static std::string const name_entry_search_str = "alt='Series Info'>";
-static std::string const id_search_str = "<a href='http://www.mangaupdates.com/series.html?id=";
-static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
-static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
-static std::string const genres_search_str = "act=genresearch&amp;genre=";
-static std::string const authors_search_str = "<div class=\"sCat\"><b>Author(s)</b></div>";
-static std::string const artists_search_str = "<div class=\"sCat\"><b>Artist(s)</b></div>";
-static std::string const year_search_str = "<div class=\"sCat\"><b>Year</b></div>";
-
-enum junk_type
+namespace
 {
-    NAME_SEARCH = 0,
-    ARTIST_AUTHOR,
-};
+    static std::string const name_entry_search_str = "alt='Series Info'>";
+    static std::string const id_search_str = "<a href='http://www.mangaupdates.com/series.html?id=";
+    static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
+    static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
+    static std::string const genres_search_str = "act=genresearch&amp;genre=";
+    static std::string const authors_search_str = "<div class=\"sCat\"><b>Author(s)</b></div>";
+    static std::string const artists_search_str = "<div class=\"sCat\"><b>Artist(s)</b></div>";
+    static std::string const year_search_str = "<div class=\"sCat\"><b>Year</b></div>";
 
-static std::pair<std::string, std::string> const junk_table[] = 
-{ 
-    { "<i>", "</i>" },  // Name junk in search results
-    { "&nbsp; [", "]" } // Artists and Authors junk
-};
-
-static std::string & find_remove_junk(std::string & str, junk_type type)
-{
-    auto const & start_pattern = junk_table[type].first;
-    auto const & end_pattern = junk_table[type].second;
-
-    auto start_pos = str.find(start_pattern);
-    if (start_pos != std::string::npos)
+    static std::pair<std::string, std::string> const junk_table[] =
     {
-        auto end_pos = str.find(end_pattern, start_pos + start_pattern.length());
-        if (end_pos != std::string::npos)
-        {
-            str.erase(start_pos, start_pattern.length());
-            str.erase(end_pos - start_pattern.length(), end_pattern.length());
-        }
-    }
+        { "<i>", "</i>" },  // Name junk in search results
+        { "&nbsp; [", "]" } // Artists and Authors junk
+    };
 
-    return str;
-}
-
-//https://en.wikipedia.org/wiki/Levenshtein_distance
-static uint32_t levenshtein_distance(std::string const & s, 
-                                     std::string const & t)
-{
-    if (s == t)
-        return 0;
-    if (s.length() == 0)
-        return t.length();
-    if (t.length() == 0)
-        return s.length();
-
-    std::vector<uint32_t> v0(t.length() + 1);
-    std::vector<uint32_t> v1(t.length() + 1);
-
-    auto n = 0;
-    std::generate(v0.begin(), v0.end(), [&n]() { return n++; });
-
-    for (auto i = 0; i < s.length(); i++)
+    enum junk_type
     {
-        v1[0] = i + 1;
+        NAME_SEARCH = 0,
+        ARTIST_AUTHOR,
+    };
 
-        for (auto j = 0; j < t.length(); j++)
+    static std::string & find_remove_junk(std::string & str, junk_type type)
+    {
+        auto const & start_pattern = junk_table[type].first;
+        auto const & end_pattern = junk_table[type].second;
+
+        auto start_pos = str.find(start_pattern);
+        if (start_pos != std::string::npos)
         {
-            auto cost = s[i] == t[j] ? 0 : 1;
-            v1[j + 1] = std::min({ v1[j] + 1, 
-                                   v0[j + 1],
-                                   v0[j] + cost});
+            auto end_pos = str.find(end_pattern, start_pos + start_pattern.length());
+            if (end_pos != std::string::npos)
+            {
+                str.erase(start_pos, start_pattern.length());
+                str.erase(end_pos - start_pattern.length(), end_pattern.length());
+            }
         }
 
-        v0 = v1;
+        return str;
     }
 
-    return v1[t.length()];
+    //https://en.wikipedia.org/wiki/Levenshtein_distance
+    static uint32_t levenshtein_distance(std::string const & s,
+        std::string const & t)
+    {
+        if (s == t)
+            return 0;
+        if (s.length() == 0)
+            return t.length();
+        if (t.length() == 0)
+            return s.length();
+
+        std::vector<uint32_t> v0(t.length() + 1);
+        std::vector<uint32_t> v1(t.length() + 1);
+
+        auto n = 0;
+        std::generate(v0.begin(), v0.end(), [&n]() { return n++; });
+
+        for (auto i = 0; i < s.length(); i++)
+        {
+            v1[0] = i + 1;
+
+            for (auto j = 0; j < t.length(); j++)
+            {
+                auto cost = s[i] == t[j] ? 0 : 1;
+                v1[j + 1] = std::min({ v1[j] + 1,
+                    v0[j + 1],
+                    v0[j] + cost });
+            }
+
+            v0 = v1;
+        }
+
+        return v1[t.length()];
+    }
 }
 
 std::string const mangaupdates::get_id(std::string const & contents, std::string const & name)

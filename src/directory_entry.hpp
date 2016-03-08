@@ -4,12 +4,12 @@
 #include "directory_file_entry.hpp"
 #include "file_enumeration.hpp"
 #include "http_utility.hpp"
+#include "utf8.hpp"
 
 #include <unordered_map>
 #include <memory>
 #include <string>
 
-#include <utf8/utf8.h>
 #include <json11/json11.hpp>
 
 #include <boost/functional/hash.hpp>
@@ -32,8 +32,7 @@ namespace base
             m_name(name),
             m_key(key)
         {
-            std::string name_utf8;
-            utf8::utf16to8(m_name.cbegin(), m_name.cend(), std::back_inserter(name_utf8));
+            std::string name_utf8 = to_utf8(m_name);
 
             m_json = json11::Json::object{ { "key", std::to_string(key) },
                                            { "name", name_utf8 } };

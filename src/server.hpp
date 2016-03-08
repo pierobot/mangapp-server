@@ -14,7 +14,10 @@
 #include <crow/crow.h>
 #include <crow/middleware.h>
 
-#include <json11/json11.hpp>
+namespace json11
+{
+    class Json;
+}
 
 namespace mangapp
 {

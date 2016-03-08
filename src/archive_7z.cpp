@@ -1,27 +1,24 @@
 #include "archive_7z.hpp"
+#include "utf8.hpp"
 
-#include <utf8/utf8.h>
+namespace
+{
+    static bool const g_initialized = ([]() -> bool
+    {
+        CrcGenerateTable();
+        return true;
+    })();
+}
 
 namespace mangapp
 {
-    namespace
-    {
-        static bool const g_initialized = ([]() -> bool
-        { 
-            CrcGenerateTable();
-            return true;
-        })();
-    }
-
     archive_7z::archive_7z(std::wstring const & filepath)
     {
         // Initialize the 7z alloc structures
         m_alloc = { SzAlloc, SzFree };
         m_tmp_alloc = { SzAllocTemp, SzFreeTemp };
         // Were we able to open the file?
-        std::string mbpath;
-
-        utf8::utf16to8(filepath.cbegin(), filepath.cend(), std::back_inserter(mbpath));
+        std::string mbpath = to_utf8(filepath);
 
         if (InFile_Open(&m_archive_stream.file, mbpath.c_str()) == SZ_OK)
         {

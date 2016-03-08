@@ -1,20 +1,20 @@
 #include "archive_zip_entry.hpp"
+#include "utf8.hpp"
 
 #include <cstring>
-
-#include <utf8/utf8.h>
 
 using namespace mangapp;
 
 entry_zip::entry_zip(zip_t * const zip_handle, zip_uint64_t index) :
     m_zip_handle(zip_handle),
     m_index(index),
-    m_zip_error(zip_stat_index(zip_handle, index, 0, &m_zip_stat))
+    m_zip_error(zip_stat_index(zip_handle, index, 0, &m_zip_stat)),
+    m_name()
 {
     if (m_zip_stat.valid & ZIP_STAT_NAME)
     {
         auto length = std::strlen(&m_zip_stat.name[0]);
-        utf8::utf8to16(&m_zip_stat.name[0], &m_zip_stat.name[length], std::back_inserter(m_name));
+        m_name = to_utf16(std::string(&m_zip_stat.name[0], &m_zip_stat.name[length]));
 
         wchar_t trailing_char = m_name[m_name.length() - 1];
         m_is_directory = (trailing_char == L'\\' || trailing_char == L'/');
