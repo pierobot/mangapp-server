@@ -16,6 +16,7 @@ This is **not** an application to download manga from various sources. If that's
 ##Dependencies
 icu:    http://site.icu-project.org/download </br>
 boost:  http://www.boost.org/ </br>
+openssl: https://github.com/openssl/openssl </br>
 zlib:   http://zlib.net/ </br>
 libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
