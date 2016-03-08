@@ -13,3 +13,7 @@ img {
     width: auto;
     max-height: 100%;
 }
+
+.navbar {
+    width: 100%;
+}

@@ -1,16 +1,23 @@
 .container {
-    width: 1200px;
+    width: 1234px;
     padding: 0px;
+    padding-top: 50px;
     box-shadow: 0 0 10px #ddd;
+    text-align: center;
 }
 
 .navbar {
+    z-index: 1;
     margin-bottom: 0px;
     position: fixed;
     width: 100%;
 }
 
-.col-lg-2.col-md-3.col-xs-3 {
+.panel-body {
+    width: 1234px;
+}
+
+.col-xs-12.col-sm-6.col-lg-8 {
     margin: 0px;
     padding: 0px;
     max-width: 200px;
