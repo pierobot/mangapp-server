@@ -1,6 +1,6 @@
 #include "server.hpp"
-#include "library.hpp"
-#include "base64.hpp"
+#include "base64.hpp"-
+#include "manga_library.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -50,11 +50,11 @@ namespace
 
 namespace mangapp
 {
-    server::server(uint16_t port, json11::Json const & json_settings, manga_library * const lib) :
+    server::server(uint16_t port, json11::Json const & json_settings, manga_library & library) :
         m_port(port),
         m_users(json_settings["users"]),
         m_tls_ssl(json_settings["tls/ssl"]),
-        m_library(lib),
+        m_library(library),
         m_app(),
         m_sessions()
     {
@@ -77,7 +77,7 @@ namespace mangapp
                 // We're authenticated, so we can send index.html
                 auto index_template(read_file_contents("../static/html/index-template.html"));
 
-                mstch::map context(m_library->get_list_context());
+                mstch::map context(m_library.get_list_context());
 
                 return crow::response(mstch::render(index_template, context));
             }
@@ -131,7 +131,7 @@ namespace mangapp
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
-            auto thumbnail_data(m_library->get_thumbnail(key, true));
+            auto thumbnail_data(m_library.get_thumbnail(key, true));
             if (thumbnail_data.empty() == true)
             {
                 return crow::response(read_file_contents("../static/img/unknown.jpg"));
@@ -152,14 +152,14 @@ namespace mangapp
                 return;
             }
 
-            m_library->get_details(key,
+            m_library.get_details(key,
                 [this, &response, key](mstch::map && context, bool success) -> void
             {
                 if (response.is_alive() == true)
                 {
                     if (success == true)
                     {
-                        auto files_context(std::move(m_library->get_files_context(key)));
+                        auto files_context(std::move(m_library.get_files_context(key)));
                         context.insert(files_context.begin(), files_context.end());
 
                         auto details_template(read_file_contents("../static/html/details-template.html"));
@@ -185,7 +185,7 @@ namespace mangapp
                 return crow::response(401);
 
             auto reader_template(read_file_contents("../static/html/reader-template.html"));
-            auto context(m_library->get_reader_context(manga_key, file_key));
+            auto context(m_library.get_reader_context(manga_key, file_key));
 
             return crow::response(mstch::render(reader_template, context));
         });
@@ -198,7 +198,7 @@ namespace mangapp
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
-            auto const image_contents = m_library->get_image(manga_key, file_key, index);
+            auto const image_contents = m_library.get_image(manga_key, file_key, index);
             if (image_contents.empty() == false)
             {
                 auto response = crow::response(image_contents);

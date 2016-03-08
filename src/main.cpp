@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
             std::cout << "Manga library serving a total of " << manga_library.size() << " items." << std::endl;
 
-            mangapp::server server(1234, settings_json, &manga_library);
+            mangapp::server server(1234, settings_json, manga_library);
             std::thread server_thread([&server]()
             {
                 server.start();

@@ -1,8 +1,6 @@
 #ifndef MANGAPP_SERVER_H
 #define MANGAPP_SERVER_H
 
-#include "manga_library.hpp"
-
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -20,10 +18,12 @@
 
 namespace mangapp
 {
+    class manga_library;
+
     class server
     {
     public:
-        server(uint16_t port, json11::Json const & json_settings, manga_library * const lib);
+        server(uint16_t port, json11::Json const & json_settings, manga_library & lib);
 
         virtual ~server();
 
@@ -35,7 +35,7 @@ namespace mangapp
         uint16_t m_port;
         json11::Json const & m_users;
         json11::Json const & m_tls_ssl;
-        manga_library * m_library;
+        manga_library & m_library;
 
         bool const is_authenticated(std::string const & session_id);
     };
