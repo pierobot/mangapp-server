@@ -11,6 +11,7 @@
     <!-- Our core CSS and JS -->
     <link href="/mangapp/static/css/common.css" rel="stylesheet">
 	<script src="/mangapp/static/js/index.js" type="text/javascript"></script>
+    <script src="/mangapp/static/js/bootstrap-list-filter.min.js" type="text/javascript"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -24,17 +25,21 @@
 
 <div class="container">
     <div class="panel panel-default center-text">
-        <div class="panel-heading">Library</div>
+        <div class="panel-heading">Library
+            <div align="right">
+                <input class="form-control" id="input-search" type="search" placeholder="Search..." style="width: auto;">
+            </div>
+        </div>
         <div class="panel-body">
             <ul id="list-manga" class="list-group thumbnails">
                 <!-- Manga thumbnails and names will be dynamically added here. -->
                 {{#library-list}}
-                <div class="col-xs-12 col-sm-6 col-lg-8" id="{{key}}">
-                    <li class="thumbnail text-overflow clickable">
+                <!--<div class="col-xs-12 col-sm-6 col-lg-8" id="{{key}}">-->
+                    <li class="list-group-item thumbnail text-overflow clickable col-xs-12 col-sm-6 col-lg-8" id="{{key}}">
                         <img class=thumbnail" src="/mangapp/thumbnail/{{key}}" id="thumb-{{key}}">
                         <b>{{name}}</b>
                     </li>
-                </div>
+                <!--</div>-->
                 {{/library-list}}
             </ul>
         </div>
@@ -44,6 +49,8 @@
 
 <script type="text/javascript">
 	list_initialize_events();
+
+    $('#list-manga').btsListFilter('#input-search', {itemChild: 'b'});
 </script>
 
 </body>
