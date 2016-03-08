@@ -25,7 +25,7 @@ function list_initialize_events() {
 				this.setAttribute("style", "background-color: #ffffff");
 			};
 
-			li = div.nextElementSibling;
+			li = li.nextElementSibling;
 		}
 	}
 }
