@@ -5,6 +5,7 @@
 #include "directory_entry.hpp"
 #include "file_enumeration.hpp"
 #include "sort.hpp"
+#include "utf8.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -13,8 +14,6 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
-
-#include <utf8/utf8.h>
 
 #include <json11/json11.hpp>
 
@@ -30,8 +29,7 @@ namespace base
 
             for (auto const & path : library_paths)
             {
-                std::wstring utf16_str;
-                utf8::utf8to16(path.cbegin(), path.cend(), std::back_inserter(utf16_str));
+                std::wstring utf16_str = to_utf16(path);
 
                 utf16_paths.push_back(utf16_str);
             }
@@ -46,8 +44,7 @@ namespace base
             for (auto const & element : library_paths.array_items())
             {
                 std::string utf8_str(element.string_value());
-                std::wstring utf16_str;
-                utf8::utf8to16(utf8_str.cbegin(), utf8_str.cend(), std::back_inserter(utf16_str));
+                std::wstring utf16_str = to_utf16(utf8_str);
 
                 utf16_paths.emplace_back(utf16_str);
             }
@@ -159,8 +156,7 @@ namespace base
             for (auto const & entry : ordered)
             {
                 std::wstring utf16_name(entry.get().get_name());
-                std::string utf8_name;
-                utf8::utf16to8(utf16_name.cbegin(), utf16_name.cend(), std::back_inserter(utf8_name));
+                std::string utf8_name = to_utf8(utf16_name);
 
                 library_array.emplace_back(mstch::map{
                     { "key",  std::to_string(entry.get().get_key()) },
@@ -203,9 +199,7 @@ namespace base
                     if (is_in_container(g_archive_extensions, entry.get_extension()) == true)
                     {
                         std::wstring const & utf16_name(entry.get_name());
-                        std::string utf8_name;
-
-                        utf8::utf16to8(utf16_name.cbegin(), utf16_name.cend(), std::back_inserter(utf8_name));
+                        std::string utf8_name = to_utf8(utf16_name);
 
                         files_array.emplace_back(mstch::map({
                             { "key", std::to_string(key) },
@@ -216,8 +210,7 @@ namespace base
                 });
 
                 std::wstring const & utf16_name(manga_comic_iterator->second.get_name());
-                std::string utf8_name;
-                utf8::utf16to8(utf16_name.cbegin(), utf16_name.cend(), std::back_inserter(utf8_name));
+                std::string utf8_name = to_utf8(utf16_name);
 
                 return mstch::map({
                     { "key", std::to_string(key) },
@@ -259,8 +252,7 @@ namespace base
                         }
 
                         std::wstring const & utf16_name(entry_iterator->second.get_name());
-                        std::string utf8_name;
-                        utf8::utf16to8(utf16_name.cbegin(), utf16_name.cend(), std::back_inserter(utf8_name));
+                        std::string utf8_name = to_utf8(utf16_name);
 
                         return mstch::map({
                             { "name", utf8_name },
@@ -328,10 +320,7 @@ namespace base
             {
                 // Yes, proceed
                 std::wstring const & wname = manga_comic_iterator->second.get_name();
-                std::string mbname;
-
-                // Encode the name to UTF-8
-                utf8::utf16to8(wname.cbegin(), wname.cend(), std::back_inserter(mbname));
+                std::string mbname = to_utf8(wname);
 
                 search_online_source(mbname, on_event);
             }

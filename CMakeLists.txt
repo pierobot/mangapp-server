@@ -43,6 +43,7 @@ IF (MSVC)
     ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_WARNINGS 
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
+                    -DWIN32_LEAN_AND_MEAN
                     -DCROW_MSVC_WORKAROUND
                     -DZIP_STATIC)
     SET(Boost_USE_STATIC_LIBS ON)

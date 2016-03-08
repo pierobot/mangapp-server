@@ -2,7 +2,6 @@
 #include "server.hpp"
 
 #include <fstream>
-#include <map>
 #include <thread>
 
 #include <json11/json11.hpp>

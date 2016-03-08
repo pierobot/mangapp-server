@@ -1,5 +1,4 @@
 #include "server.hpp"
-#include "base64.hpp"-
 #include "manga_library.hpp"
 
 #include <algorithm>
@@ -18,8 +17,8 @@ namespace
     {
         std::string session_id;
         std::string characters("abcdefghijklmnopqrstuvwxyz"
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            "1234567890");
+                               "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                               "1234567890");
 
         session_id.resize(64);
         boost::random::random_device rng;
