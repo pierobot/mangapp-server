@@ -10,8 +10,6 @@
 #include <memory>
 #include <string>
 
-#include <json11/json11.hpp>
-
 #include <boost/functional/hash.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/filesystem.hpp>
@@ -32,11 +30,6 @@ namespace base
             m_name(name),
             m_key(key)
         {
-            std::string name_utf8 = to_utf8(m_name);
-
-            m_json = json11::Json::object{ { "key", std::to_string(key) },
-                                           { "name", name_utf8 } };
-
             enumerate_files(path + name, file_search_flags::FlagFile, false,
                 [this, &path](std::wstring const & full_path, file_search_flags flag)
             {
@@ -84,18 +77,12 @@ namespace base
         {
             return m_key;
         }
-
-        json11::Json const & to_json() const
-        {
-            return m_json;
-        }
     protected:
         map_type m_files;
     private:
         std::wstring const m_path;
         std::wstring const m_name;
         size_t const m_key;
-        json11::Json m_json;
     };
 
 }
