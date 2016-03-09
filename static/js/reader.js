@@ -25,6 +25,9 @@ function reader_onload() {
 		img.onload = function() {
 			window.scrollTo(document.body.scrollHeight, 0);
 		};
+		img.onclick = function() {
+			next_image();
+		};
 
 		var div_current_image =document.getElementById("current-image");
 		div_current_image.appendChild(img);
