@@ -5,7 +5,6 @@ sudo: required
 before_install:
     - sudo apt-get install build-essential cmake libicu-dev libboost-dev zlib1g-dev libzip-dev libssl-dev
 install:
-    - wget https://cmake.org/files/v3.5/cmake-3.5.0-Linux-x86_64.tar.gz && tar -zxvf cmake-3.5.0-Linux-x86_64.tar.gz && cd cmake-3.5.0-Linux-x86_64 && sudo cp bin/* /usr/local/bin
     - wget http://www.rarlab.com/rar/unrarsrc-5.3.11.tar.gz && tar -zxvf unrarsrc-5.3.11.tar.gz && cd unrar && make lib && sudo make install-lib && sudo mkdir /usr/local/include/unrar && sudo cp *.hpp /usr/local/include/unrar
     - cd ~/
     - git clone https://github.com/no1msd/mstch && cd mstch && mkdir build && cd build && cmake ../. && make && make install
