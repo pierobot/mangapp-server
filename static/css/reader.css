@@ -9,7 +9,7 @@ img {
 }
 
 .fit-height > img {
-    padding-top: auto;
+    padding-top: 50px;
     width: auto;
     max-height: 100%;
 }
