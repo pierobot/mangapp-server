@@ -21,6 +21,7 @@ zlib:   http://zlib.net/ </br>
 libzip: http://www.nih.at/libzip/ </br>
 unrar:  http://www.rarlabs.com/rar_add.htm </br>
 mstch:  https://github.com/no1msd/mstch </br>
+opencv: https://github.com/itseez/opencv </br>
 
 ##Build instructions
 #####GNU/Linux
