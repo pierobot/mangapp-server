@@ -17,6 +17,8 @@ namespace mangapp
         typedef std::vector<entry_pointer>::iterator iterator;
         typedef std::vector<entry_pointer>::const_iterator const_iterator;
 
+        virtual ~archive() {}
+
         virtual iterator begin() = 0;
         virtual iterator end() = 0;
         virtual const_iterator cbegin() const = 0;
