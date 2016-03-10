@@ -13,6 +13,8 @@ namespace mangapp
     class archive_entry
     {
     public:
+        virtual ~archive_entry() {}
+
         virtual std::string const contents() const = 0;
         virtual uint64_t index() const = 0;
         virtual uint64_t size() const = 0;
