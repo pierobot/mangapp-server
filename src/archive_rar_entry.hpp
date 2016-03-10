@@ -23,7 +23,7 @@ namespace mangapp
          *  @param size the size of the entry in bytes
          *  @param inde the index of the entry
          */
-        entry_rar(std::wstring rar_path, std::wstring name, bool is_dir, uint64_t size, uint64_t index);
+        entry_rar(std::wstring const & rar_path, std::wstring const & name, bool is_dir, uint64_t size, uint64_t index);
 
         virtual ~entry_rar();
 
