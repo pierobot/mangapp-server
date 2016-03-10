@@ -33,9 +33,17 @@ namespace mangapp
             return m_entries.cend();
         }
 
+        virtual iterator erase(const_iterator first, const_iterator last) final
+        {
+            return m_entries.erase(first, last);
+        }
+
         virtual entry_pointer operator[](size_t index) final
         {
-            return m_entries[index];
+            if (m_entries.size() > 1)
+                return m_entries[index];
+            else
+                return nullptr;
         }
 
         virtual uint64_t count() const final
