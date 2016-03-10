@@ -4,8 +4,8 @@
 
 namespace mangapp
 {
-    entry_rar::entry_rar(std::wstring rar_path,
-                         std::wstring name,
+    entry_rar::entry_rar(std::wstring const & rar_path,
+                         std::wstring const & name,
                          bool is_dir,
                          uint64_t size,
                          uint64_t index) :
