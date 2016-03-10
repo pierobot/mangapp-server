@@ -1,8 +1,6 @@
 #include "archive_7z.hpp"
 #include "utf8.hpp"
 
-#include <algorithm>
-
 namespace
 {
     static bool const g_initialized = ([]() -> bool
