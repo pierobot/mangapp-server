@@ -13,7 +13,7 @@ namespace mangapp
     class archive
     {
     public:
-        typedef std::shared_ptr<archive_entry> entry_pointer;
+        typedef std::unique_ptr<archive_entry> entry_pointer;
         typedef std::vector<entry_pointer>::iterator iterator;
         typedef std::vector<entry_pointer>::const_iterator const_iterator;
 
@@ -25,7 +25,7 @@ namespace mangapp
 
         virtual uint64_t count() const = 0;
 
-        virtual entry_pointer operator[](size_t index) = 0;
+        virtual entry_pointer const & operator[](size_t index) = 0;
 
         static std::unique_ptr<archive> open(std::wstring const & file_path);
     protected:

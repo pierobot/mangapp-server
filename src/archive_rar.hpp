@@ -38,7 +38,7 @@ namespace mangapp
             return m_entries.erase(first, last);
         }
 
-        virtual entry_pointer operator[](size_t index) final
+        virtual entry_pointer const & operator[](size_t index) final
         {
             if (m_entries.size() > 1)
                 return m_entries[index];
