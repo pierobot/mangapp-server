@@ -21,6 +21,7 @@ namespace mangapp
         virtual iterator end() = 0;
         virtual const_iterator cbegin() const = 0;
         virtual const_iterator cend() const = 0;
+        virtual iterator erase(const_iterator first, const_iterator last) = 0;
 
         virtual uint64_t count() const = 0;
 

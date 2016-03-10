@@ -23,6 +23,7 @@ namespace base
         typedef FileEntryType file_entry_type;
         typedef std::unordered_map<size_t, file_entry_type> map_type;
 
+        typedef typename map_type::iterator iterator;
         typedef typename map_type::const_iterator const_iterator;
 
         directory_entry(std::wstring const & path, std::wstring const & name, size_t key) :

@@ -41,7 +41,10 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/server.cpp src/server.hpp
                          src/sort.hpp
                          
-                         src/utf8.cpp src/utf8.hpp)
+                         src/utf8.cpp src/utf8.hpp
+                         
+                         src/image.cpp src/image.hpp
+)
 
 FILE(GLOB JSON11_SOURCES include/json11/json11.cpp include/json11/json11.h)
 FILE(GLOB 7Z_SOURCES include/7z/7zAlloc.c
@@ -143,6 +146,15 @@ IF(OPENSSL_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENSSL_LIBRARIES})
 ELSE()
     MESSAGE(FATAL_ERROR "Unable to locate OpenSSL.")
+ENDIF()
+#--------------------------------------------------------------
+FIND_PACKAGE(OpenCV REQUIRED core imgproc imgcodecs videoio highgui)
+IF(OPENCV_CORE_FOUND AND OPENCV_IMGPROC_FOUND AND OPENCV_IMGCODECS_FOUND AND
+   OPENCV_VIDEOIO_FOUND AND OPENCV_HIGHGUI_FOUND)
+	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBRARIES})
+ELSE()
+	MESSAGE(FATAL_ERROR "Unable to locate opencv libraries.")
 ENDIF()
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME})

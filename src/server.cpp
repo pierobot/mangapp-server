@@ -130,7 +130,7 @@ namespace mangapp
             if (is_authenticated(session_id) == false)
                 return crow::response(401);
 
-            auto thumbnail_data(m_library.get_thumbnail(key, true));
+            auto thumbnail_data(m_library.get_thumbnail(key));
             if (thumbnail_data.empty() == true)
             {
                 return crow::response(read_file_contents("../static/img/unknown.jpg"));

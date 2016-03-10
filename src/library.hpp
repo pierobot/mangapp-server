@@ -6,6 +6,7 @@
 #include "file_enumeration.hpp"
 #include "sort.hpp"
 #include "utf8.hpp"
+#include "image.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -52,11 +53,12 @@ namespace base
             return utf16_paths;
         }
 
-        static std::vector<std::wstring> const g_image_extensions = { L".jpg", L".jpeg", L".png" };
+        static std::vector<std::wstring> const g_image_extensions = { L".jpg", L".jpeg", L".png",
+                                                                      L".JPG", L".JPEG", L".PNG" };
 
-        static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr",
-                                                                        L".zip", L".cbz",
-                                                                        L".7z",  L".cb7" };
+        static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr", L".RAR", L".CBR",
+                                                                        L".zip", L".cbz", L".ZIP", L".CBZ",
+                                                                        L".7z",  L".cb7", L".7Z", L".CB7" };
 
         template<class Container, class Element>
         static bool is_in_container(Container const & container, Element const & element)
@@ -271,11 +273,10 @@ namespace base
         *   Retrieval from an archive is NOT implemented yet.
         *
         *   @param key the key of the manga/comic
-        *   @param folder indicates whether or not to retrieve from the folder or archive
         *   @param index index of the archive in the folder
         *   @return a string containing the thumbnail's contents
         */
-        std::string get_thumbnail(key_type key, bool folder, uint32_t index = 0) const
+        std::string get_thumbnail(key_type key, uint32_t index = 0) const
         {
             std::string thumb_data;
 
@@ -283,23 +284,34 @@ namespace base
             // Does the specified key exist in our map?
             if (manga_comic_iterator != cend())
             {
-                // Yes, do we want the folder's thumbnail? 
-                if (folder == true)
+                // Look for an existing thumbnail
+                size_t thumb_key_1 = boost::hash<std::wstring>()(L"folder.jpg");
+                size_t thumb_key_2 = boost::hash<std::wstring>()(L"folder.jpeg");
+                auto thumb_iterator_1 = manga_comic_iterator->second.find(thumb_key_1);
+                auto thumb_iterator_2 = manga_comic_iterator->second.find(thumb_key_2);
+                if (thumb_iterator_1 != manga_comic_iterator->second.cend())
                 {
-                    // Yes, get the contents of "folder.jpg"
-                    size_t thumb_key = boost::hash<std::wstring>()(L"folder.jpg");
-                    auto thumb_iterator = manga_comic_iterator->second.find(thumb_key);
-                    if (thumb_iterator != manga_comic_iterator->second.cend())
-                    {
-                        thumb_data = thumb_iterator->second.contents();
-                    }
+                    thumb_data = thumb_iterator_1->second.contents();
+                }
+                else if (thumb_iterator_2 != manga_comic_iterator->second.cend())
+                {
+                    thumb_data = thumb_iterator_2->second.contents();
                 }
                 else
                 {
-                    // No, get the thumbnail from an archive
+                    // No existing thumbnail - get one
+                    directory_entry_type const & dir_entry = manga_comic_iterator->second;
+                    auto archive_key = get_first_archive_key(dir_entry);
 
-                    // NOT IMPLEMENTED YET
-                    // NEED IMAGE RESIZE LIBRARY
+                    auto image = get_image(key, archive_key, 0);
+                    if (image.empty() == false)
+                    {
+                        mangapp::image img(image);
+                        img.resize(128, 180);
+                        thumb_data = img.contents(".jpeg");
+
+                        std::cout << thumb_data.size() << std::endl;
+                    }
                 }
             }
 
@@ -352,8 +364,19 @@ namespace base
                     // Make sure we have a valid archive pointer before proceeding
                     if (archive_ptr != nullptr)
                     {
+                        // Remove any file entries that are not images
+                        auto first = std::find_if(archive_ptr->cbegin(), archive_ptr->cend(),
+                            [](mangapp::archive::entry_pointer const & entry_ptr) -> bool
+                        {
+                            return is_in_container(g_image_extensions, entry_ptr->extension()) == false ||
+                                   entry_ptr->is_dir() == true;
+                        });
+
+                        archive_ptr->erase(first, archive_ptr->end());
+
                         // Get the contents of the image
                         auto image_ptr = (*archive_ptr)[index];
+                        
                         if (image_ptr != nullptr)
                             image_contents = image_ptr->contents();
                     }
@@ -375,6 +398,42 @@ namespace base
         }
     private:
         library_map_t m_entries;
+
+        key_type get_first_archive_key(directory_entry_type const & dir_entry) const
+        {
+            key_type key = -1;
+
+            std::wstring full_path = dir_entry.get_path() + dir_entry.get_name();
+            enumerate_files(full_path, file_search_flags::FlagFile, true,
+                [&key](std::wstring const & file_path, file_search_flags) -> void
+            {
+                if (key != -1)
+                    return;
+
+                auto extension_start_pos = file_path.rfind(L'.');
+                if (extension_start_pos != std::string::npos)
+                {
+                    auto extension_str = file_path.substr(extension_start_pos);
+                    if (is_in_container(g_archive_extensions, extension_str) == true)
+                    {
+                        auto name_start_pos_1 = file_path.rfind(L'/');
+                        auto name_start_pos_2 = file_path.rfind(L'\\');
+                        if (name_start_pos_1 != std::string::npos)
+                        {
+                            auto name_str = file_path.substr(++name_start_pos_1);
+                            key = boost::hash<std::wstring>()(name_str);
+                        }
+                        else if (name_start_pos_2 != std::string::npos)
+                        {
+                            auto name_str = file_path.substr(++name_start_pos_2);
+                            key = boost::hash<std::wstring>()(name_str);
+                        }
+                    }
+                }
+            });
+
+            return key;
+        };
     };
 }
 
