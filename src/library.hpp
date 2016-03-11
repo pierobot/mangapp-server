@@ -363,10 +363,13 @@ namespace base
                         });
 
                         // Get the contents of the image
-                        auto const & image_ptr = (*archive_ptr)[index];
-                        
-                        if (image_ptr != nullptr)
-                            image_contents = image_ptr->contents();
+                        if (archive_ptr->count() > 1)
+                        {
+                            auto const & image_ptr = (*archive_ptr)[index];
+
+                            if (image_ptr != nullptr)
+                                image_contents = image_ptr->contents();
+                        }
                     }
                 }
             }

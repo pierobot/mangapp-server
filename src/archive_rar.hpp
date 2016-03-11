@@ -42,10 +42,7 @@ namespace mangapp
 
         virtual entry_pointer const & operator[](size_t index) final
         {
-            if (m_entries.size() > 1)
-                return m_entries[index];
-            else
-                return nullptr;
+            return m_entries[index];
         }
 
         virtual uint64_t count() const final
