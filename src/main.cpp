@@ -36,7 +36,7 @@ static bool verify_arguments(boost::program_options::variables_map const & args,
 }
 
 int main(int argc, char **argv)
-{
+{   
     boost::locale::generator gen;
 
     std::locale jp_locale(gen("ja_JP"));

@@ -52,7 +52,7 @@ namespace mangapp
             std::wstring extension_str;
 
             auto extension_start_pos = m_name.rfind(L'.');
-            if (extension_start_pos != std::string::npos)
+            if (extension_start_pos != std::wstring::npos)
             {
                 extension_str = m_name.substr(extension_start_pos);
             }

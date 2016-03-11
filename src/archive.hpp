@@ -3,6 +3,7 @@
 
 #include "archive_entry.hpp"
 
+#include <functional>
 #include <memory>
 
 namespace mangapp
@@ -23,7 +24,7 @@ namespace mangapp
         virtual iterator end() = 0;
         virtual const_iterator cbegin() const = 0;
         virtual const_iterator cend() const = 0;
-        virtual iterator erase(const_iterator first, const_iterator last) = 0;
+        virtual void filter(std::function<bool(entry_pointer const &)> filter_fn) = 0;
 
         virtual uint64_t count() const = 0;
 
