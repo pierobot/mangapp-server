@@ -354,14 +354,13 @@ namespace base
                     if (archive_ptr != nullptr)
                     {
                         // Remove any file entries that are not images
-                        auto first = std::find_if(archive_ptr->cbegin(), archive_ptr->cend(),
-                            [](mangapp::archive::entry_pointer const & entry_ptr) -> bool
+                        archive_ptr->filter([key](mangapp::archive::entry_pointer const & entry_ptr) -> bool
                         {
-                            return is_in_container(g_image_extensions, entry_ptr->extension()) == false ||
-                                   entry_ptr->is_dir() == true;
-                        });
+                            bool remove = is_in_container(g_image_extensions, entry_ptr->extension()) == false ||
+                                          entry_ptr->is_dir() == true;
 
-                        archive_ptr->erase(first, archive_ptr->end());
+                            return remove;
+                        });
 
                         // Get the contents of the image
                         auto const & image_ptr = (*archive_ptr)[index];

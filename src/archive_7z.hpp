@@ -4,6 +4,8 @@
 #include "archive.hpp"
 #include "archive_7z_entry.hpp"
 
+#include <algorithm>
+
 namespace mangapp
 {
     /** 
@@ -41,9 +43,9 @@ namespace mangapp
             return m_entries.cend();
         }
 
-        virtual iterator erase(const_iterator first, const_iterator last) final
+        virtual void filter(std::function<bool(entry_pointer const &)> filter_fn) final
         {
-            return m_entries.erase(first, last);
+            m_entries.erase(std::remove_if(m_entries.begin(), m_entries.end(), filter_fn), m_entries.end());
         }
 
         virtual entry_pointer const & operator[](size_t index) final
