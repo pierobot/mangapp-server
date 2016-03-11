@@ -36,11 +36,6 @@ namespace mangapp
             return m_entries.cend();
         }
 
-        virtual iterator erase(const_iterator first, const_iterator last) final
-        {
-            return m_entries.erase(first, last);
-        }
-
         virtual void filter(std::function<bool(entry_pointer const &)> filter_fn) final
         {
             m_entries.erase(std::remove_if(m_entries.begin(), m_entries.end(), filter_fn), m_entries.end());
@@ -48,10 +43,7 @@ namespace mangapp
 
         virtual entry_pointer const & operator[](size_t index) final
         {
-            if (m_entries.size() > 1)
-                return m_entries[index];
-            else
-                return nullptr;
+            return m_entries[index];
         }
 
         virtual zip_uint64_t count() const final
