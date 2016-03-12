@@ -227,17 +227,19 @@ namespace base
                     {
                         mstch::array image_array;
                         uint32_t image_count = 0;
+
                         for (auto const & image_entry : *archive_ptr)
                         {
-                            if (is_in_container(g_image_extensions, image_entry->extension()) == false)
-                                continue;
+                            if (is_in_container(g_image_extensions, image_entry->extension()) == true)
+                            {
+                                image_array.emplace_back(mstch::map({
+                                    { "key", std::to_string(key) },
+                                    { "file-key", std::to_string(file_key) },
+                                    { "index", std::to_string(image_count) }
+                                }));
 
-                            ++image_count;
-                            image_array.emplace_back(mstch::map({
-                                { "key", std::to_string(key) },
-                                { "file-key", std::to_string(file_key) },
-                                { "index", std::to_string(image_entry->index()) }
-                            }));
+                                ++image_count;
+                            }
                         }
 
                         std::wstring const & utf16_name(entry_iterator->second.get_name());
@@ -363,7 +365,7 @@ namespace base
                         });
 
                         // Get the contents of the image
-                        if (archive_ptr->count() > 1)
+                        if (archive_ptr->count() > 0)
                         {
                             auto const & image_ptr = (*archive_ptr)[index];
 
