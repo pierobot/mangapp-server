@@ -12,19 +12,12 @@ namespace mangapp
 
         if (m_zip_handle != nullptr && error == ZIP_ER_OK)
         {
-            m_entry_count = zip_get_num_entries(m_zip_handle, 0);
+            auto entry_count = zip_get_num_entries(m_zip_handle, 0);
 
-            for (zip_uint64_t entry_index = 0; entry_index < m_entry_count; entry_index++)
+            for (zip_uint64_t entry_index = 0; entry_index < entry_count; entry_index++)
             {
                 m_entries.emplace_back(new entry_zip(m_zip_handle, entry_index));
             }
-
-            // Erase any directories
-            m_entries.erase(std::remove_if(m_entries.begin(), m_entries.end(),
-                [this](entry_pointer const & value) -> bool
-            {
-                return value->is_dir();
-            }), m_entries.end());
         }
     }
 

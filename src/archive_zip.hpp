@@ -48,12 +48,11 @@ namespace mangapp
 
         virtual zip_uint64_t count() const final
         {
-            return m_entry_count;
+            return m_entries.size();
         }
     protected:
     private:
         zip_t * m_zip_handle;
-        zip_uint64_t m_entry_count;
         std::vector<entry_pointer> m_entries;
     };
 
