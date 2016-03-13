@@ -59,9 +59,9 @@ namespace mangapp
     protected:
     private:
         zip_t * const m_zip_handle;
-        int m_zip_error;
         zip_uint64_t m_index;
         zip_stat_t m_zip_stat;
+        int m_zip_error;
         std::wstring m_name;
         bool m_is_directory;
     };

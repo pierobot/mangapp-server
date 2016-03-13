@@ -71,8 +71,8 @@ namespace mangapp
         ISzAlloc * m_alloc;
         ISzAlloc * m_tmp_alloc;
         std::wstring m_name;
-        UInt64 m_size;
         UInt32 m_index;
+        UInt64 m_size;
     };
 
 }

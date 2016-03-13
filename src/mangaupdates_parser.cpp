@@ -67,11 +67,11 @@ namespace
         auto n = 0;
         std::generate(v0.begin(), v0.end(), [&n]() { return n++; });
 
-        for (auto i = 0; i < s.length(); i++)
+        for (size_t i = 0; i < s.length(); i++)
         {
             v1[0] = i + 1;
 
-            for (auto j = 0; j < t.length(); j++)
+            for (size_t j = 0; j < t.length(); j++)
             {
                 auto cost = s[i] == t[j] ? 0 : 1;
                 v1[j + 1] = std::min({ v1[j] + 1,

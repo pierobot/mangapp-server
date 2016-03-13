@@ -12,7 +12,7 @@ std::string const http_utility::encode_ncr(std::string const & str)
     std::string encoded_ncr;
     uint32_t code_point = 0;
 
-    for (auto i = 0; i < str.length(); i++)
+    for (size_t i = 0; i < str.length(); i++)
     {
         if (((str[i] >> 7) & 0x0f) == 0x0) // one octet
         {
