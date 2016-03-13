@@ -11,9 +11,9 @@ namespace mangapp
                          uint64_t index) :
         m_rar_path(rar_path),
         m_name(name),
-        m_is_dir(is_dir),
         m_size(size),
-        m_index(index)
+        m_index(index),
+        m_is_dir(is_dir)
     {
     }
 

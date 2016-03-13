@@ -51,10 +51,10 @@ namespace mangapp
 {
     server::server(uint16_t port, json11::Json const & json_settings, manga_library & library) :
         m_port(port),
-        m_users(json_settings["users"]),
-        m_tls_ssl(json_settings["tls/ssl"]),
         m_library(library),
         m_app(),
+        m_users(json_settings["users"]),
+        m_tls_ssl(json_settings["tls/ssl"]),
         m_sessions()
     {
         crow::logger::setLogLevel(crow::LogLevel::CRITICAL);

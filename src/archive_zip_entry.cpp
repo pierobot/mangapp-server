@@ -37,7 +37,7 @@ std::string const entry_zip::contents() const
 
         if (file_handle != nullptr)
         {
-            zip_int64_t bytes_read = zip_fread(file_handle, &file_contents[0], file_contents.size());
+            zip_fread(file_handle, &file_contents[0], file_contents.size());
             zip_fclose(file_handle);
         }
     }

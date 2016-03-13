@@ -33,12 +33,12 @@ namespace mangapp
         void start();
     protected:
     private:
-        crow::Crow<crow::CookieParser> m_app;
-        std::vector<std::string> m_sessions;
         uint16_t m_port;
+        manga_library & m_library;
+        crow::Crow<crow::CookieParser> m_app;
         json11::Json const & m_users;
         json11::Json const & m_tls_ssl;
-        manga_library & m_library;
+        std::vector<std::string> m_sessions;
 
         bool const is_authenticated(std::string const & session_id);
     };
