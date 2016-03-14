@@ -20,7 +20,8 @@
 .col-xs-6.col-sm-6.col-md-6.col-lg-8 {
     margin: 0px;
     padding: 10px;
-    width: 200px;
+    max-width: 200px;
+    min-width: 160px;
 }
 
 .clickable {

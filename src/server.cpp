@@ -63,7 +63,6 @@ namespace mangapp
         CROW_ROUTE(m_app, "/mangapp").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request) -> crow::response
         {
-            auto s = request.get_header_value("id");
             auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
 
             if (is_authenticated(session_id) == false)
@@ -109,6 +108,24 @@ namespace mangapp
             else
                 return crow::response(401);
             
+        });
+
+        CROW_ROUTE(m_app, "/mangapp/logout").methods(crow::HTTPMethod::GET)
+            ([this](crow::request const & request) -> crow::response
+        {
+            auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
+            if (is_authenticated(session_id) == true)
+            {
+                m_sessions.erase(std::remove_if(m_sessions.begin(), m_sessions.end(),
+                    [&session_id](std::string const & value_str) -> bool
+                {
+                    return session_id == value_str;
+                }), m_sessions.end());
+
+                return crow::response(200);
+            }
+            else
+                return crow::response(401);
         });
 
         // Route for serving static web content
