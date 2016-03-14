@@ -68,7 +68,8 @@ int main(int argc, char **argv)
 
             std::cout << "Manga library serving a total of " << manga_library.size() << " items." << std::endl;
 
-            mangapp::server server(1234, settings_json, manga_library);
+            uint16_t port = settings_json["port"].int_value();
+            mangapp::server server(port, settings_json, manga_library);
             std::thread server_thread([&server]()
             {
                 server.start();
