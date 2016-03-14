@@ -46,32 +46,32 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/image.cpp src/image.hpp
 )
 
-FILE(GLOB JSON11_SOURCES include/json11/json11.cpp include/json11/json11.h)
-FILE(GLOB 7Z_SOURCES include/7z/7zAlloc.c
-                     include/7z/7zBuf.c
-                     include/7z/7zCrc.c
-                     include/7z/7zCrcOpt.c
-                     include/7z/7zFile.c
-                     include/7z/7zDec.c
-                     include/7z/7zArcIn.c
-                     include/7z/7zStream.c
-                     include/7z/Bcj2.c
-                     include/7z/Bra.c
-                     include/7z/Bra86.c
-                     include/7z/BraIA64.c
-                     include/7z/CpuArch.c
-                     include/7z/Delta.c
-                     include/7z/Lzma2Dec.c
-                     include/7z/LzmaDec.c
-                     include/7z/Ppmd7.c
-                     include/7z/Ppmd7Dec.c)
+FILE(GLOB JSON11_SOURCES thirdparty/json11/json11.cpp thirdparty/json11/json11.h)
+FILE(GLOB 7Z_SOURCES thirdparty/7z/7zAlloc.c
+                     thirdparty/7z/7zBuf.c
+                     thirdparty/7z/7zCrc.c
+                     thirdparty/7z/7zCrcOpt.c
+                     thirdparty/7z/7zFile.c
+                     thirdparty/7z/7zDec.c
+                     thirdparty/7z/7zArcIn.c
+                     thirdparty/7z/7zStream.c
+                     thirdparty/7z/Bcj2.c
+                     thirdparty/7z/Bra.c
+                     thirdparty/7z/Bra86.c
+                     thirdparty/7z/BraIA64.c
+                     thirdparty/7z/CpuArch.c
+                     thirdparty/7z/Delta.c
+                     thirdparty/7z/Lzma2Dec.c
+                     thirdparty/7z/LzmaDec.c
+                     thirdparty/7z/Ppmd7.c
+                     thirdparty/7z/Ppmd7Dec.c)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES} 
                                ${JSON11_SOURCES}
                                ${SERVER_SOURCES})
 
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} include)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} thirdparty)
 
 IF (MSVC)
     SET(CMAKE_USE_WIN32_THREADS_INIT true)
