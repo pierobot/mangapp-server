@@ -1,5 +1,5 @@
 .container {
-    width: 1234px;
+    width: auto;
     padding: 0px;
     padding-top: 50px;
     box-shadow: 0 0 10px #ddd;
@@ -14,13 +14,13 @@
 }
 
 .panel-body {
-    width: 1234px;
+    width: auto;
 }
 
-.col-xs-12.col-sm-6.col-lg-8 {
+.col-xs-6.col-sm-2.col-lg-8 {
     margin: 0px;
     padding: 10px;
-    max-width: 200px;
+    width: 200px;
 }
 
 .clickable {
