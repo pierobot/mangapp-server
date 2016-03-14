@@ -1,5 +1,3 @@
-
-
 function list_initialize_events() {
 	var manga_list = document.getElementById("list-manga");
 	
@@ -28,4 +26,17 @@ function list_initialize_events() {
 			li = li.nextElementSibling;
 		}
 	}
+}
+
+function logout() {
+	$.ajax({
+		url: "/mangapp/logout",
+		method: "GET",
+		dataType: "application/json",
+		statusCode: {
+			200: function() {
+				window.location = "/mangapp";
+			}
+		}
+	});
 }
