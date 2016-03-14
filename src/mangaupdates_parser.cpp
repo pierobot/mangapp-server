@@ -94,21 +94,21 @@ std::string const mangaupdates::get_id(std::string const & contents, std::string
 
     // mangaupdates sends the names NCR encoded, so we must encode ours to NCR as well
     auto ncr_name = http_utility::encode_ncr(name);
-    auto id_start_pos = contents.find(id_search_str);
+    size_t id_start_pos = contents.find(id_search_str);
     // Iterate through every search result entry
     while (id_start_pos != std::string::npos)
     {
         id_start_pos += id_search_str.length();
-        auto id_end_pos = contents.find("'", id_start_pos);
+        size_t id_end_pos = contents.find("'", id_start_pos);
         if (id_end_pos == std::string::npos)
             break;
         
         id = contents.substr(id_start_pos, id_end_pos - id_start_pos);
-        auto name_start_pos = contents.find(name_entry_search_str, id_start_pos);
+        size_t name_start_pos = contents.find(name_entry_search_str, id_start_pos);
         if (name_start_pos != std::string::npos)
         {
             name_start_pos += name_entry_search_str.length();
-            auto name_end_pos = contents.find("</a>", name_start_pos);
+            size_t name_end_pos = contents.find("</a>", name_start_pos);
             if (name_end_pos == std::string::npos)
                 break;
             // Get the string from positions and remove any junk
@@ -141,7 +141,7 @@ std::string const mangaupdates::get_description(std::string const & contents)
 {
     std::string description;
 
-    auto start_pos = contents.find(desc_search_str);
+    size_t start_pos = contents.find(desc_search_str);
     if (start_pos != std::string::npos)
     {
         start_pos += desc_search_str.length();
@@ -151,7 +151,7 @@ std::string const mangaupdates::get_description(std::string const & contents)
         {
             ++start_pos;
 
-            auto end_pos = contents.find("</div>", start_pos);
+            size_t end_pos = contents.find("</div>", start_pos);
             if (end_pos != std::string::npos)
                 description = contents.substr(start_pos, end_pos - start_pos);
         }
@@ -164,23 +164,23 @@ std::vector<std::string> const mangaupdates::get_associated_names(std::string co
 {
     std::vector<std::string> associated_names;
 
-    auto start_pos = contents.find(ass_names_search_str);
+    size_t start_pos = contents.find(ass_names_search_str);
     if (start_pos != std::string::npos)
     {
         start_pos += ass_names_search_str.length();
     
-        auto div_end_pos = contents.find("</div>", start_pos);
+        size_t div_end_pos = contents.find("</div>", start_pos);
         if (div_end_pos != std::string::npos)
         {
             --div_end_pos;
 
-            auto end_pos = 0;
+            size_t end_pos = 0;
             start_pos = contents.find(">", start_pos);
             if (start_pos != std::string::npos)
             {
                 ++start_pos;
 
-                for (auto i = 0; start_pos < div_end_pos; i++)
+                for (size_t i = 0; start_pos < div_end_pos; i++)
                 {
                     end_pos = contents.find("<br />", start_pos);
                     if (end_pos == std::string::npos)
@@ -200,18 +200,18 @@ std::vector<std::string> const mangaupdates::get_genres(std::string const & cont
 {
     std::vector<std::string> genres;
 
-    auto start_pos = contents.find(genres_search_str);
+    size_t start_pos = contents.find(genres_search_str);
     if (start_pos != std::string::npos)
     {
         start_pos += genres_search_str.length();
 
-        auto end_pos = 0;
-        auto div_end_pos = contents.find("</div>", start_pos);
+        size_t end_pos = 0;
+        size_t div_end_pos = contents.find("</div>", start_pos);
         if (div_end_pos != std::string::npos)
         {
             --div_end_pos;
 
-            for (auto i = 0; start_pos < div_end_pos; i++)
+            for (size_t i = 0; start_pos < div_end_pos; i++)
             {
                 start_pos = contents.find("<u>", start_pos);
                 if (start_pos == std::string::npos)
@@ -241,19 +241,19 @@ std::vector<std::string> const mangaupdates::get_authors(std::string const & con
 {
     std::vector<std::string> authors;
 
-    auto start_pos = contents.find(authors_search_str);
+    size_t start_pos = contents.find(authors_search_str);
     if (start_pos != std::string::npos)
     {
         start_pos += authors_search_str.length();
 
-        auto end_pos = 0;
-        auto div_end_pos = contents.find("</div>", start_pos);
+        size_t end_pos = 0;
+        size_t div_end_pos = contents.find("</div>", start_pos);
 
         if (div_end_pos != std::string::npos)
         {
             --div_end_pos;
 
-            for (auto i = 0; start_pos < div_end_pos; i++)
+            for (size_t i = 0; start_pos < div_end_pos; i++)
             {
                 start_pos = contents.find("<u>", start_pos);
                 if (start_pos == std::string::npos)
@@ -277,18 +277,18 @@ std::vector<std::string> const mangaupdates::get_artists(std::string const & con
 {
     std::vector<std::string> artists;
 
-    auto start_pos = contents.find(artists_search_str);
+    size_t start_pos = contents.find(artists_search_str);
     if (start_pos != std::string::npos)
     {
         start_pos += artists_search_str.length();
 
-        auto end_pos = 0;
-        auto div_end_pos = contents.find("</div>", start_pos);
+        size_t end_pos = 0;
+        size_t div_end_pos = contents.find("</div>", start_pos);
         if (div_end_pos != std::string::npos)
         {
             --div_end_pos;
 
-            for (auto i = 0; start_pos < div_end_pos; i++)
+            for (size_t i = 0; start_pos < div_end_pos; i++)
             {
                 start_pos = contents.find("<u>", start_pos);
                 if (start_pos == std::string::npos)
@@ -312,14 +312,14 @@ std::string const mangaupdates::get_year(std::string const & contents)
 {
     std::string year;
 
-    auto start_pos = contents.find(year_search_str) + year_search_str.length();
+    size_t start_pos = contents.find(year_search_str) + year_search_str.length();
     if (start_pos != std::string::npos)
     {
         start_pos = contents.find(">", start_pos);
         if (start_pos != std::string::npos)
         {
             ++start_pos;
-            auto end_pos = contents.find("</div>", start_pos);
+            size_t end_pos = contents.find("</div>", start_pos);
             if (end_pos != std::string::npos)
             {
                 --end_pos; // new line character
