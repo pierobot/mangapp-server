@@ -119,7 +119,7 @@ std::string const mangaupdates::get_id(std::string const & contents, std::string
                 return id;
 
             auto larger_length = std::max(potential_match.length(), name.length());
-            auto match_percentage = 1 - (static_cast<float>(levenshtein_distance(potential_match, name)) / larger_length);
+            auto match_percentage = 1.0f - (static_cast<float>(levenshtein_distance(potential_match, name)) / larger_length);
 
             matches.emplace_back(match_percentage, id);
         }
