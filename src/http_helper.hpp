@@ -52,7 +52,7 @@ namespace mangapp
     class socket_deleter
     {
     public:
-        socket_deleter(std::atomic_uint8_t & socket_count) :
+        socket_deleter(std::atomic<uint8_t> & socket_count) :
             m_socket_count(socket_count)
         {
             ++m_socket_count;
@@ -67,7 +67,7 @@ namespace mangapp
             }
         }
     private:
-        std::atomic_uint8_t & m_socket_count;
+        std::atomic<uint8_t> & m_socket_count;
     };
 
     class http_helper
@@ -111,7 +111,7 @@ namespace mangapp
         std::atomic_bool m_is_running;
         std::thread m_thread;
         uint8_t m_max_sockets;
-        std::atomic_uint8_t m_socket_count;
+        std::atomic<uint8_t> m_socket_count;
         std::mutex m_mutex_work;
         std::queue<std::function<void()>> m_pending_work;
 
