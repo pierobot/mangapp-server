@@ -3,17 +3,23 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
 #include <zlib.h>
+
+extern std::mutex g_mutex_cout;
 
 namespace mangapp
 {
     static std::string const content_length_str = "Content-Length: ";
     static std::string const transfer_encoding_str = "Transfer-Encoding: ";
 
-    http_helper::http_helper() :
-        m_io_service(),
-        m_infinite_work(new boost::asio::io_service::work(m_io_service))
+    http_helper::http_helper(uint8_t max_sockets/* = 4 */) :
+        m_max_sockets(max_sockets),
+        m_socket_count(0),
+        m_mutex_work(),
+        m_pending_work(),
+        m_io_service()
     {
         m_is_running = true;
 
@@ -21,15 +27,31 @@ namespace mangapp
         {
             while (m_is_running == true)
             {
-                m_io_service.run();
-                //std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                m_io_service.poll();
+                
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
+                m_io_service.post([this]() -> void
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex_work);
+
+                    if (m_pending_work.size() > 0)
+                    {
+                        if (m_socket_count < m_max_sockets)
+                        {
+                            auto work_function = m_pending_work.front();
+                            m_pending_work.pop();
+
+                            work_function();
+                        }
+                    }
+                });
             }
         });
     }
 
     http_helper::~http_helper()
     {
-        m_infinite_work.reset();
         m_is_running = false;
 
         m_io_service.stop();
@@ -56,46 +78,68 @@ namespace mangapp
 
                 auto ret = inflate(&zstream, Z_NO_FLUSH);
 
-                if (ret == Z_OK)
+                if (ret == Z_OK || ret == Z_STREAM_END)
                 {
                     std::copy(&tmp[0], &tmp[8192 - zstream.avail_out], std::back_inserter(inflated_buffer));
                 }
+                else
+                {
+                    // Something went wrong with inflate; make sure we return an empty string
+                    inflated_buffer.clear();
+                    break;
+                }
 
             } while (zstream.avail_out == 0);
+
+            // Free zlib's internal memory
+            inflateEnd(&zstream);
         }
 
         return inflated_buffer;
     }
 
     void http_helper::http_get_async(std::string const & host,
-        std::string const & url,
-        on_ready_function on_ready,
-        on_error_function on_error)
+                                     std::string const & url,
+                                     on_ready_function on_ready,
+                                     on_error_function on_error)
     {
-        using namespace boost::asio;
-
-        ip::tcp::resolver resolver(m_io_service);
-        ip::tcp::resolver::query query(ip::tcp::v4(), host, "80");
-        ip::tcp::resolver::iterator iterator = resolver.resolve(query);
-
-        socket_pointer socket(new ip::tcp::socket(m_io_service));
-        string_pointer contents(new std::string());
-        context_pointer context(new http_context());
-
-        context->on_error = on_error;
-        context->on_ready = on_ready;
-        context->host = host;
-        context->url = url;
-        // Since these calls are asynchronous, we must use copy-by-value in the lambda's captures or the 
-        // variables could, and most likely will, be in an invalid state.
-        async_connect(*socket, iterator,
-            [this, socket, context](boost::system::error_code const & error, ip::tcp::resolver::iterator iterator)
+        auto work_function = [this, host, url, on_ready, on_error]() -> void
         {
-            if (error != 0)
-                context->on_error(error.message());
-            else
-                on_connect(socket, context);
-        });
+            using namespace boost::asio;
+
+            ip::tcp::resolver resolver(m_io_service);
+            ip::tcp::resolver::query query(ip::tcp::v4(), host, "80");
+            ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+
+            socket_deleter deleter(m_socket_count);
+            socket_pointer socket(new ip::tcp::socket(m_io_service), deleter);
+            context_pointer context(new http_context());
+
+            context->on_error = on_error;
+            context->on_ready = on_ready;
+            context->host = std::move(host);
+            context->url = std::move(url);
+
+            async_connect(*socket, iterator,
+                [this, socket, context](boost::system::error_code const & error, ip::tcp::resolver::iterator iterator)
+            {
+                if (error != 0)
+                    context->on_error(error.message());
+                else
+                    on_connect(socket, context);
+            });
+        };
+
+        if (m_socket_count < m_max_sockets)
+        {
+            work_function();
+        }
+        else
+        {
+            std::lock_guard<std::mutex> lock(m_mutex_work);
+            
+            m_pending_work.emplace(work_function);
+        }
     }
 
     void http_helper::on_connect(socket_pointer socket, context_pointer context)
@@ -162,8 +206,7 @@ namespace mangapp
             if (context->bytes_transferred < context->content_length)
             {
                 // No, issue another read for the remaining content
-                auto buffer = boost::asio::buffer(&context->contents[context->bytes_transferred],
-                    context->content_length - context->bytes_transferred);
+                auto buffer = boost::asio::buffer(&context->contents[context->bytes_transferred], context->content_length - context->bytes_transferred);
                 async_read(*socket, buffer,
                     [this, socket, context](boost::system::error_code const & error, size_t bytes_read)
                 {
@@ -187,7 +230,7 @@ namespace mangapp
     {
         // We no longer need the request header
         context->contents.clear();
-
+        
         async_read_until(*socket, context->stream, "\r\n\r\n",
             [this, socket, context](boost::system::error_code const & error, size_t bytes_read)
         {
@@ -212,8 +255,8 @@ namespace mangapp
     }
 
     std::string const http_helper::get_contents_from_stream(boost::asio::streambuf & streambuf,
-        size_t bytes_read,
-        size_t expected_size /* = 0 */) const
+                                                            size_t bytes_read,
+                                                            size_t expected_size /* = 0 */) const
     {
         std::string contents;
         auto buffers = streambuf.data();

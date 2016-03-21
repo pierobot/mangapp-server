@@ -1,8 +1,11 @@
 ﻿#include "manga_library.hpp"
 #include "server.hpp"
 
+#include "manga_cache.hpp"
+
 #include <fstream>
 #include <thread>
+#include <mutex>
 
 #include <json11/json11.hpp>
 
@@ -10,6 +13,8 @@
 #include <boost/program_options.hpp>
 
 #include <boost/algorithm/string.hpp>
+
+std::mutex g_mutex_cout;
 
 static bool verify_arguments(boost::program_options::variables_map const & args,
                              boost::program_options::options_description const & options)

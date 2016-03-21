@@ -1,16 +1,18 @@
 #include "manga_library.hpp"
 #include "http_utility.hpp"
 #include "mangaupdates_parser.hpp"
+#include "utf8.hpp"
 
-#include <iostream>
+#include <fstream>
+#include <mutex>
 
 #include <json11/json11.hpp>
-
-#include <utf8/utf8.h>
 
 #include <boost/functional/hash.hpp>
 
 #include <mstch/mstch.hpp>
+
+extern std::mutex g_mutex_cout;
 
 namespace mangapp
 {

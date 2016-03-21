@@ -16,7 +16,7 @@ namespace json11
 
 namespace mangapp
 {
-    class manga_library : virtual public base::library<manga_directory>
+    class manga_library : public base::library<manga_directory>
     {
     public:
         typedef manga_directory directory_type;

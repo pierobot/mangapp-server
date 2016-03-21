@@ -8,6 +8,8 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <mutex>
+#include <queue>
 #include <string>
 #include <thread>
 #include <utility>
@@ -41,6 +43,31 @@ namespace mangapp
             on_ready(nullptr), on_error(nullptr)
         {
         }
+
+        ~http_context()
+        {
+        }
+    };
+
+    class socket_deleter
+    {
+    public:
+        socket_deleter(std::atomic_uint8_t & socket_count) :
+            m_socket_count(socket_count)
+        {
+            ++m_socket_count;
+        }
+
+        void operator()(boost::asio::ip::tcp::socket * p)
+        {
+            if (p != nullptr)
+            {
+                delete p;
+                --m_socket_count;
+            }
+        }
+    private:
+        std::atomic_uint8_t & m_socket_count;
     };
 
     class http_helper
@@ -53,12 +80,11 @@ namespace mangapp
         
         typedef std::shared_ptr<boost::asio::io_service::work> work_pointer;
 
-
         typedef std::function<void(boost::system::error_code const &, size_t)> on_io_function;
         typedef std::function<void(std::string const &)> on_ready_function;
         typedef std::function<void(std::string const &)> on_error_function;
 
-        http_helper();
+        http_helper(uint8_t max_sockets = 4);
         virtual ~http_helper();
 
         void http_get_async(std::string const & host,
@@ -84,8 +110,12 @@ namespace mangapp
 
         std::atomic_bool m_is_running;
         std::thread m_thread;
+        uint8_t m_max_sockets;
+        std::atomic_uint8_t m_socket_count;
+        std::mutex m_mutex_work;
+        std::queue<std::function<void()>> m_pending_work;
+
         boost::asio::io_service m_io_service;
-        work_pointer m_infinite_work;
     };
 }
 
