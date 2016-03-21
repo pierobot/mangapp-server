@@ -9,7 +9,6 @@
 #include "image.hpp"
 
 #include <cstdint>
-#include <fstream>
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -62,8 +61,10 @@ namespace base
         typedef DirectoryEntryType directory_entry_type;
         typedef typename DirectoryEntryType::file_entry_type file_entry_type;
 
-        typedef std::unordered_map<key_type, directory_entry_type> library_map_t;
-        typedef typename library_map_t::const_iterator const_iterator;
+        typedef std::unordered_map<key_type, directory_entry_type> library_map_type;
+        typedef typename library_map_type::const_iterator const_iterator;
+
+        typedef std::unordered_map<std::tuple<key_type, size_t>, std::reference_wrapper<std::string const>> thumbnail_cache_type;
 
         /**
         *  Constructor for the library. Multiple paths can be parsed.
@@ -390,7 +391,7 @@ namespace base
         {
         }
     private:
-        library_map_t m_entries;
+        library_map_type m_entries;
     };
 }
 
