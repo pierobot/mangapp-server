@@ -19,7 +19,8 @@ namespace mangapp
         m_socket_count(0),
         m_mutex_work(),
         m_pending_work(),
-        m_io_service()
+        m_io_service(),
+        m_infinite_work(new boost::asio::io_service::work(m_io_service))
     {
         m_is_running = true;
 

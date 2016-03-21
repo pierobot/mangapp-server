@@ -116,6 +116,7 @@ namespace mangapp
         std::queue<std::function<void()>> m_pending_work;
 
         boost::asio::io_service m_io_service;
+        work_pointer m_infinite_work;
     };
 }
 
