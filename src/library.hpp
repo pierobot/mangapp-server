@@ -64,8 +64,6 @@ namespace base
         typedef std::unordered_map<key_type, directory_entry_type> library_map_type;
         typedef typename library_map_type::const_iterator const_iterator;
 
-        typedef std::unordered_map<std::tuple<key_type, size_t>, std::reference_wrapper<std::string const>> thumbnail_cache_type;
-
         /**
         *  Constructor for the library. Multiple paths can be parsed.
         *
@@ -174,7 +172,7 @@ namespace base
 
                 std::sort(ordered.begin(), ordered.end(),
                     [](std::reference_wrapper<library::file_entry_type const> const & left,
-                        std::reference_wrapper<library::file_entry_type const> const & right)
+                       std::reference_wrapper<library::file_entry_type const> const & right)
                 {
                     return sort::numerical_wregex_less()(left.get().get_name(), right.get().get_name());
                 });
@@ -326,7 +324,7 @@ namespace base
                 std::wstring const & wname = manga_comic_iterator->second.get_name();
                 std::string mbname = to_utf8(wname);
 
-                search_online_source(mbname, on_event);
+                search_online_source(key, mbname, on_event);
             }
         }
 
@@ -387,7 +385,7 @@ namespace base
         *   @param name the name of the manga/comic
         *   @param on_event a callback that handles the mstch::map object
         */
-        virtual void search_online_source(std::string const & name, std::function<void(mstch::map&&, bool)> on_event)
+        virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event)
         {
         }
     private:
