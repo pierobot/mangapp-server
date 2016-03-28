@@ -35,7 +35,8 @@ namespace mangapp
     {
     }
 
-    void manga_library::search_online_source(std::string const & name,
+    void manga_library::search_online_source(key_type key,
+                                             std::string const & name,
                                              std::function<void(mstch::map&&, bool)> on_event)
     {
         std::string search_url = "/series.html?page=1&stype=title&search=" + http_utility::encode_uri(http_utility::encode_ncr(name));
@@ -46,7 +47,7 @@ namespace mangapp
         };
 
         m_http_helper.http_get_async("www.mangaupdates.com", search_url,
-            [this, name, on_event, on_error](std::string const & contents)
+            [this, key, name, on_event, on_error](std::string const & contents)
         {
             std::string series_id = mangaupdates::get_id(contents, name);
             if (series_id == "")
@@ -55,7 +56,7 @@ namespace mangapp
             std::string series_url = "/series.html?id=" + series_id;
 
             m_http_helper.http_get_async("www.mangaupdates.com", series_url,
-                [series_id, on_event](std::string const & contents)
+                [key, series_id, on_event](std::string const & contents)
             {
                 auto associated_names = mangaupdates::get_associated_names(contents);
                 auto description = mangaupdates::get_description(contents);
@@ -63,6 +64,11 @@ namespace mangapp
                 auto authors = mangaupdates::get_authors(contents);
                 auto artists = mangaupdates::get_artists(contents);
                 auto year = mangaupdates::get_year(contents);
+                auto img_url = mangaupdates::get_img_url(contents);
+
+                // In the case no image url is found, get from either the archive or folder.jpeg
+                if (img_url.empty() == true)
+                    img_url = std::string("/mangapp/thumbnail/") + std::to_string(key);
 
                 mstch::array names_array;
                 for (auto const & name : associated_names)
@@ -102,7 +108,8 @@ namespace mangapp
                     { "authors-list", authors_array},
                     { "artists-list", artists_array },
                     { "genres-list", genres_array },
-                    { "year", year }
+                    { "year", year },
+                    { "img-url", img_url }
                 };
 
                 on_event(std::move(context), true);
