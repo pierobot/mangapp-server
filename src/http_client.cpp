@@ -250,7 +250,6 @@ namespace mangapp
     void http_client::on_handshake(context_pointer context)
     {
         auto const request_str = to_string(*context->request_ptr);
-        std::cout << request_str << std::endl;
         auto request_buffer = boost::asio::buffer(&request_str[0], request_str.size());
 
         auto lambda_on_write = [this, context](boost::system::error_code const & error, size_t bytes_written)
@@ -313,8 +312,6 @@ namespace mangapp
                 }
 
                 // Start the initial read for the body
-                /*auto buffer = boost::asio::buffer(&context->body[context->bytes_transferred], context->content_length - context->bytes_transferred);*/
-
                 if (context->is_chunked == true)
                 {
                     // Since this is chunked, we can read until we reach \r\n
@@ -325,7 +322,6 @@ namespace mangapp
                 }
                 else
                 {
-                    // Issue another read for the response's body
                     if (context->request_ptr->get_protocol() == http_protocol::https)
                         boost::asio::async_read(*context->socket_ssl, context->stream, lambda_on_read);
                     else
@@ -372,8 +368,6 @@ namespace mangapp
                 }
                 else
                 {
-                    /*auto buffer = boost::asio::buffer(&context->body[context->bytes_transferred], context->content_length - context->bytes_transferred);*/
-
                     if (context->request_ptr->get_protocol() == http_protocol::https)
                         boost::asio::async_read(*context->socket_ssl, context->stream, lambda_on_read);
                     else
@@ -382,9 +376,9 @@ namespace mangapp
             }
             else
             {
+                // We have all the data, but there's a possibility that another chunk follows
                 if (context->is_chunked == true && bytes_read > 0)
                 {
-                    // There's a possibility that another chunk follows
                     if (context->request_ptr->get_protocol() == http_protocol::https)
                         boost::asio::async_read_until(*context->socket_ssl, context->stream, "\r\n", lambda_on_read);
                     else
