@@ -4,7 +4,7 @@
 #include "manga_directory_entry.hpp"
 #include "library.hpp"
 #include "manga_entry.hpp"
-#include "http_helper.hpp"
+#include "http_client.hpp"
 
 #include <string>
 #include <vector>
@@ -31,7 +31,7 @@ namespace mangapp
     protected:
         virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event) final;
     private:
-        http_helper m_http_helper;
+        http_client m_http_client;
     };
 }
 
