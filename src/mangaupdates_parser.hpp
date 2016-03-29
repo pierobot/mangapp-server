@@ -13,6 +13,7 @@ namespace mangaupdates
     std::vector<std::string> const get_authors(std::string const & contents);
     std::vector<std::string> const get_artists(std::string const & contents);
     std::string const get_year(std::string const & contents);
+    std::string const get_img_url(std::string const & contents);
 };
 
 #endif

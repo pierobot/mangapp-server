@@ -11,13 +11,14 @@
 namespace
 {
     static std::string const name_entry_search_str = "alt='Series Info'>";
-    static std::string const id_search_str = "<a href='http://www.mangaupdates.com/series.html?id=";
+    static std::string const id_search_str = "www.mangaupdates.com/series.html?id=";
     static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
     static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
     static std::string const genres_search_str = "act=genresearch&amp;genre=";
     static std::string const authors_search_str = "<div class=\"sCat\"><b>Author(s)</b></div>";
     static std::string const artists_search_str = "<div class=\"sCat\"><b>Artist(s)</b></div>";
     static std::string const year_search_str = "<div class=\"sCat\"><b>Year</b></div>";
+    static std::string const img_search_str = "<div class=\"sContent\" ><center><img";
 
     static std::pair<std::string, std::string> const junk_table[] =
     {
@@ -312,9 +313,10 @@ std::string const mangaupdates::get_year(std::string const & contents)
 {
     std::string year;
 
-    size_t start_pos = contents.find(year_search_str) + year_search_str.length();
+    size_t start_pos = contents.find(year_search_str);
     if (start_pos != std::string::npos)
     {
+        start_pos += year_search_str.length();
         start_pos = contents.find(">", start_pos);
         if (start_pos != std::string::npos)
         {
@@ -329,4 +331,27 @@ std::string const mangaupdates::get_year(std::string const & contents)
     }
 
     return year;
+}
+
+std::string const mangaupdates::get_img_url(std::string const & contents)
+{
+    std::string img_url;
+
+    size_t start_pos = contents.find(img_search_str);
+    if (start_pos != std::string::npos)
+    {
+        start_pos += img_search_str.length();
+        start_pos = contents.find("src='", start_pos);
+        if (start_pos != std::string::npos)
+        {
+            start_pos += 5;
+            size_t end_pos = contents.find('\'', start_pos);
+            if (end_pos != std::string::npos)
+            {
+                img_url = contents.substr(start_pos, end_pos - start_pos);
+            }
+        }
+    }
+
+    return img_url;
 }
