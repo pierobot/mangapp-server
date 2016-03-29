@@ -11,7 +11,7 @@
 namespace
 {
     static std::string const name_entry_search_str = "alt='Series Info'>";
-    static std::string const id_search_str = "<a href='http://www.mangaupdates.com/series.html?id=";
+    static std::string const id_search_str = "www.mangaupdates.com/series.html?id=";
     static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
     static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
     static std::string const genres_search_str = "act=genresearch&amp;genre=";
