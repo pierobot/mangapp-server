@@ -65,7 +65,7 @@ namespace mangapp
 
             on_event(mstch::map({}), false);
         };
-
+        
         m_http_client.send(request_title,
             [this, key, name, on_error, on_event](http_client::response_pointer && response)
         {

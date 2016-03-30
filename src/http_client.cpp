@@ -296,7 +296,7 @@ namespace mangapp
                     return;
                 }
 
-                auto const content_length_str = context->response_ptr->get_header_value("Content-Length");
+                auto const & content_length_str = context->response_ptr->get_header_value("Content-Length");
                 if (content_length_str.empty() == false)
                 {
                     context->content_length = std::stoull(content_length_str);
