@@ -44,11 +44,24 @@ namespace mangapp
                                              std::string const & name,
                                              std::function<void(mstch::map&&, bool)> on_event)
     {
-        http_client::request_pointer request_title(new http_request(http_protocol::https, "www.mangaupdates.com", "/series.html", "", {
-            { "page", "1" },
-            { "stype", "title" },
-            { "search", http_utility::encode_uri(http_utility::encode_ncr(name)) }
-        }));
+        auto on_error = [on_event](std::string const & error_msg)
+        {
+            std::lock_guard<std::mutex> lock(g_mutex_cout);
+
+            std::cout << error_msg << std::endl;
+
+            on_event(mstch::map({}), false);
+        };
+
+        http_client::request_pointer request_title(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/series.html"));
+        if (request_title == nullptr)
+        {
+            on_error("Unable to allocate http_client::request_pointer");
+        }
+
+        request_title->add_parameter("page", "1");
+        request_title->add_parameter("stype", "title");
+        request_title->add_parameter("search", http_utility::encode_uri(http_utility::encode_ncr(name)));
 
         request_title->add_header("Accept", "text/html");
         request_title->add_header("Accept-Encoding", "gzip, deflate");
@@ -56,15 +69,6 @@ namespace mangapp
         request_title->add_header("Host", "www.mangaupdates.com");
         request_title->add_header("DNT", "1");
         request_title->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
-
-        auto on_error = [on_event](std::string const & error_msg)
-        {
-            std::lock_guard<std::mutex> lock(g_mutex_cout);
-            
-            std::cout << error_msg << std::endl;
-
-            on_event(mstch::map({}), false);
-        };
         
         m_http_client.send(request_title,
             [this, key, name, on_error, on_event](http_client::response_pointer && response)
@@ -82,9 +86,13 @@ namespace mangapp
                 return;
             }
 
-            http_client::request_pointer request_id(new http_request(http_protocol::https, "www.mangaupdates.com", "/series.html", "", {
-                { "id", series_id }
-            }));
+            http_client::request_pointer request_id(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/series.html"));
+            if (request_id == nullptr)
+            {
+                on_error("Unable to allocate http_client::request_pointer");
+            }
+
+            request_id->add_parameter("id", series_id);
 
             request_id->add_header("Accept", "text/html");
             request_id->add_header("Accept-Encoding", "gzip, deflate");

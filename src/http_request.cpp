@@ -2,17 +2,23 @@
 
 namespace mangapp
 {
-    http_request::http_request(http_protocol protocol, std::string host, std::string url, std::string body, parameters_init_type params/*= {}*/) :
+    http_request::http_request(http_protocol protocol, http_action action, std::string host, std::string url) :
         m_protocol(protocol),
+        m_action(action),
         m_host(std::move(host)),
         m_url(std::move(url)),
-        m_body(std::move(body)),
-        m_parameters(std::move(params))
+        m_body(),
+        m_parameters()
     {
     }
 
     http_request::~http_request()
     {
+    }
+
+    void http_request::add_parameter(std::string key, std::string value)
+    {
+        m_parameters.emplace(std::move(key), std::move(value));
     }
 
     void http_request::add_header(std::string name, std::string value)
@@ -33,9 +39,19 @@ namespace mangapp
         return empty_value;
     }
 
+    void http_request::set_body(std::string body)
+    {
+        m_body = std::move(body);
+    }
+
     http_protocol const http_request::get_protocol() const
     {
         return m_protocol;
+    }
+
+    http_action const http_request::get_action() const
+    {
+        return m_action;
     }
 
     std::string const & http_request::get_host() const
