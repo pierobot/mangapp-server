@@ -62,7 +62,17 @@ namespace mangapp
             headers += header.first + ": " + header.second + "\r\n";
         }
         
-        std::string buffer = "GET " + url_and_params + " HTTP/" + version_str + "\r\n" +
+        std::string action;
+        switch (request.get_action())
+        {
+        case http_action::post:
+            action = "POST ";
+        case http_action::get:
+        default:
+            action = "GET ";
+        }
+
+        std::string buffer = action + url_and_params + " HTTP/" + version_str + "\r\n" +
                              headers + 
                              request.get_body() + "\r\n\r\n";
 
