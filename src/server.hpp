@@ -22,11 +22,12 @@ namespace json11
 namespace mangapp
 {
     class manga_library;
+    class users;
 
     class server
     {
     public:
-        server(uint16_t port, json11::Json const & json_settings, manga_library & lib);
+        server(uint16_t port, json11::Json const & json_settings, users & usrs, manga_library & lib);
 
         virtual ~server();
 
@@ -34,13 +35,10 @@ namespace mangapp
     protected:
     private:
         uint16_t m_port;
+        users & m_users;
         manga_library & m_library;
         crow::Crow<crow::CookieParser> m_app;
-        json11::Json const & m_users;
         json11::Json const & m_tls_ssl;
-        std::vector<std::string> m_sessions;
-
-        bool const is_authenticated(std::string const & session_id);
     };
 }
 
