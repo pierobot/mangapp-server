@@ -1,13 +1,26 @@
 {
     "port": 1234,
-	
+    
     "users": [
-        "pierobot:testpass"
+        {
+            "name": "pierobot",
+            "password": "testpass"
+        },
+        {
+            "name": "muffinrobot",
+            "password": "testpass"
+        }
     ],
     
     "manga": [
-        "E:/Manga/Manga",
-        "H:/Manga/Manga"
+        {
+           "path": "E:/Manga/Manga/",
+           "access": [ "pierobot", "muffinrobot" ]
+        },
+        {
+            "path": "H:/Manga/Manga/",
+            "access": [ "pierobot" ]
+        }
     ],
 
     "comic": [ 
