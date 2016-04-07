@@ -5,15 +5,11 @@
 #include "directory_entry.hpp"
 #include "file_enumeration.hpp"
 #include "sort.hpp"
+#include "users.hpp"
 #include "utf8.hpp"
 #include "image.hpp"
 
-#include <cstdint>
-#include <functional>
-#include <string>
 #include <unordered_map>
-#include <memory>
-#include <vector>
 
 #include <json11/json11.hpp>
 
@@ -43,7 +39,8 @@ namespace base
 
             for (auto const & element : library_paths.array_items())
             {
-                std::string utf8_str(element.string_value());
+                json11::Json const & object = element.object_items();
+                std::string utf8_str(object["path"].string_value());
                 std::wstring utf16_str = to_utf16(utf8_str);
 
                 utf16_paths.emplace_back(utf16_str);
@@ -69,8 +66,9 @@ namespace base
         *
         *  @param library_paths a vector containing the file path(s)
         */
-        library(std::vector<std::wstring> const & library_paths) :
-            m_entries()
+        library(std::vector<std::wstring> const & library_paths, mangapp::users & users) :
+            m_entries(),
+            m_users(users)
         {
             // Iterate through the libraries
             for (auto const & library_path : library_paths)
@@ -89,15 +87,14 @@ namespace base
             }
         }
 
-        library(std::vector<std::string> const & library_paths) :
-            library(utf8_paths_to_utf16(library_paths))
+        library(std::vector<std::string> const & library_paths, mangapp::users & users) :
+            library(utf8_paths_to_utf16(library_paths), users)
         {
         }
 
-        library(json11::Json const & library_paths) : 
-            library(json_to_utf16_vector(library_paths))
+        library(json11::Json const & library_paths, mangapp::users & users) :
+            library(json_to_utf16_vector(library_paths), users)
         {
-
         }
 
         virtual ~library()
@@ -124,14 +121,16 @@ namespace base
             return m_entries.size();
         }
 
-        mstch::map const get_list_context() const
+        mstch::map const get_list_context(std::string const & session_id) const
         {
             mstch::array library_array;
 
             std::vector<std::reference_wrapper<directory_entry_type const>> ordered;
             for (auto const & pair : m_entries)
             {
-                ordered.push_back(std::cref(pair.second));
+                size_t path_key = boost::hash<std::wstring>()(pair.second.get_path());
+                if (m_users.can_access(session_id, path_key) == true)
+                    ordered.push_back(std::cref(pair.second));
             }
 
             std::sort(ordered.begin(), ordered.end(),
@@ -157,11 +156,15 @@ namespace base
             });
         }
 
-        mstch::map get_files_context(key_type key) const
+        mstch::map get_files_context(std::string const & session_id, key_type key) const
         {
             auto manga_comic_iterator = library::find(key);
             if (manga_comic_iterator != library::cend())
             {
+                size_t path_key = boost::hash<std::wstring>()(manga_comic_iterator->second.get_path());
+                if (m_users.can_access(session_id, path_key) == false)
+                    return mstch::map();
+
                 std::vector<std::reference_wrapper<library::file_entry_type const>> ordered;
 
                 std::for_each(manga_comic_iterator->second.cbegin(), manga_comic_iterator->second.cend(),
@@ -208,14 +211,18 @@ namespace base
                 });
             }
 
-            return mstch::map({});
+            return mstch::map();
         }
 
-        mstch::map const get_reader_context(key_type key, key_type file_key) const
+        mstch::map const get_reader_context(std::string const & session_id, key_type key, key_type file_key) const
         {
             auto entry_iterator = find(key);
             if (entry_iterator != cend())
             {
+                size_t path_key = boost::hash<std::wstring>()(entry_iterator->second.get_path());
+                if (m_users.can_access(session_id, path_key) == false)
+                    return mstch::map();
+
                 auto archive_iterator = entry_iterator->second.find(file_key);
                 if (archive_iterator != entry_iterator->second.cend())
                 {
@@ -253,7 +260,7 @@ namespace base
                 }
             }
 
-            return mstch::map({});
+            return mstch::map();
         }
 
         /**
@@ -264,7 +271,7 @@ namespace base
         *   @param index index of the archive in the folder
         *   @return a string containing the thumbnail's contents
         */
-        std::string get_thumbnail(key_type key, uint32_t index = 0) const
+        std::string get_thumbnail(std::string const & session_id, key_type key, uint32_t index = 0) const
         {
             std::string thumb_data;
 
@@ -294,7 +301,7 @@ namespace base
                     {
                         file_entry_type const & file_entry = dir_entry.cbegin()->second;
                         auto archive_key = file_entry.get_key();
-                        auto image = get_image(key, archive_key, 0);
+                        auto image = get_image(session_id, key, archive_key, 0);
                         if (image.empty() == false)
                         {
                             mangapp::image img(image);
@@ -336,7 +343,7 @@ namespace base
         *   @param index the index of the image
         *   @return a string containing the image's contents
         */
-        std::string get_image(key_type key, key_type file_key, size_t index) const
+        std::string get_image(std::string const & session_id, key_type key, key_type file_key, size_t index) const
         {
             std::string image_contents;
 
@@ -344,6 +351,10 @@ namespace base
             auto manga_comic_iterator = library::find(key);
             if (manga_comic_iterator != library::cend())
             {
+                size_t path_key = boost::hash<std::wstring>()(manga_comic_iterator->second.get_path());
+                if (m_users.can_access(session_id, path_key) == false)
+                    return "";
+
                 // Yes. Is the file archive key valid?
                 auto archive_iterator = manga_comic_iterator->second.find(file_key);
                 if (archive_iterator != manga_comic_iterator->second.cend())
@@ -390,6 +401,7 @@ namespace base
         }
     private:
         library_map_type m_entries;
+        mangapp::users & m_users;
     };
 }
 

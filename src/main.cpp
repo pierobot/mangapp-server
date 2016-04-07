@@ -1,5 +1,6 @@
 ﻿#include "manga_library.hpp"
 #include "server.hpp"
+#include "users.hpp"
 
 #include <fstream>
 #include <thread>
@@ -66,13 +67,15 @@ int main(int argc, char **argv)
         json11::Json settings_json = json11::Json::parse(settings_str, error_str);
         if (settings_json != nullptr)
         {
-            auto const & manga_settings = settings_json["manga"];
-            mangapp::manga_library manga_library(manga_settings);
+            auto const & users_json = settings_json["users"];
+            auto const & manga_json = settings_json["manga"];
+            mangapp::users users(users_json, manga_json);
+            mangapp::manga_library manga_library(manga_json, users);
 
             std::cout << "Manga library serving a total of " << manga_library.size() << " items." << std::endl;
 
             uint16_t port = settings_json["port"].int_value();
-            mangapp::server server(port, settings_json, manga_library);
+            mangapp::server server(port, settings_json, users, manga_library);
             std::thread server_thread([&server]()
             {
                 server.start();

@@ -18,20 +18,20 @@ extern std::mutex g_mutex_cout;
 
 namespace mangapp
 {
-    manga_library::manga_library(std::vector<std::wstring> const & library_paths) :
-        library<manga_directory>(library_paths),
+    manga_library::manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & usrs) :
+        library<manga_directory>(library_paths, usrs),
         m_http_client(http_version::v1_1)
     {
     }
 
-    manga_library::manga_library(std::vector<std::string> const & library_paths) : 
-        library<manga_directory>(library_paths),
+    manga_library::manga_library(std::vector<std::string> const & library_paths, mangapp::users & usrs) :
+        library<manga_directory>(library_paths, usrs),
         m_http_client(http_version::v1_1)
     {
     }
 
-    manga_library::manga_library(json11::Json const & library_paths) : 
-        library<manga_directory>(library_paths),
+    manga_library::manga_library(json11::Json const & library_paths, mangapp::users & usrs) :
+        library<manga_directory>(library_paths, usrs),
         m_http_client(http_version::v1_1)
     {
     }

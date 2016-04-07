@@ -45,6 +45,7 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
 
 						 src/string.hpp
                          
+						 src/users.cpp src/users.hpp
                          src/utf8.cpp src/utf8.hpp
                          
                          src/image.cpp src/image.hpp

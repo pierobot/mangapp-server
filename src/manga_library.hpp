@@ -24,9 +24,9 @@ namespace mangapp
 
         typedef base::library<directory_type>::key_type key_type;
 
-        manga_library(std::vector<std::wstring> const & library_paths);
-        manga_library(std::vector<std::string> const & library_paths);
-        manga_library(json11::Json const & library_paths);
+        manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & usrs);
+        manga_library(std::vector<std::string> const & library_paths, mangapp::users & usrs);
+        manga_library(json11::Json const & library_paths, mangapp::users & usrs);
         virtual ~manga_library();
     protected:
         virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event) final;
