@@ -232,6 +232,7 @@ namespace base
                     if (archive_ptr != nullptr)
                     {
                         mstch::array image_array;
+                        mstch::array image_dropdown;
                         uint32_t image_count = 0;
 
                         for (auto const & image_entry : *archive_ptr)
@@ -244,7 +245,9 @@ namespace base
                                     { "index", std::to_string(image_count) }
                                 }));
 
-                                ++image_count;
+                                image_dropdown.emplace_back(mstch::map({
+                                    { "image-index", std::to_string(++image_count) }
+                                }));
                             }
                         }
 
@@ -254,6 +257,7 @@ namespace base
                         return mstch::map({
                             { "name", utf8_name },
                             { "image-count", std::to_string(image_count) },
+                            { "image-dropdown", image_dropdown },
                             { "image-list", image_array }
                         });
                     }

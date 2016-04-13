@@ -30,14 +30,21 @@
 
         <div class="collapse navbar-collapse" id="navbar-collapse-div">
             <ul class="nav navbar-nav">
-                <li class="clickable navbar-link"><a id="next-image"><span class="glyphicon glyphicon-chevron-left"></span> Next</a></li>
-                <li class="clickable navbar-link"><a id="prev-image">Previous <span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                <li class="clickable navbar-link"><a id="next-image"><span class="glyphicon glyphicon-chevron-left white"></span> Next</a></li>
+                <li class="clickable navbar-link"><a id="prev-image">Previous <span class="glyphicon glyphicon-chevron-right white"></span></a></li>
 
-                <li>
-                    <a id="total">Page
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Page
                         <span id="file-index" class="badge">1</span> of
                         <span id="file-count" class="badge">{{image-count}}</span>
+                        <span class="glyphicon glyphicon-chevron-down white"></span>
                     </a>
+                    <ul id="image-dropdown" class="dropdown-menu" style="color: black;">
+                        {{#image-dropdown}}
+                        <li><a href="#">{{image-index}}</a></li>
+                        {{/image-dropdown}}
+                    </ul>
                 </li>
             </ul>
         </div>
