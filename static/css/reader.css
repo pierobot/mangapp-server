@@ -17,3 +17,13 @@ img {
 .navbar {
     width: 100%;
 }
+
+.white {
+    color: #fff;
+}
+
+.dropdown-menu {
+    max-height: 360px;
+    overflow: hidden;
+    overflow-y: auto;
+}

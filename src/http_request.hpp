@@ -1,8 +1,6 @@
 #ifndef MANGAPP_HTTP_REQUEST_HPP
 #define MANGAPP_HTTP_REQUEST_HPP
 
-#include <functional>
-#include <initializer_list>
 #include <map>
 #include <string>
 #include <unordered_map>
