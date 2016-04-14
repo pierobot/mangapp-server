@@ -15,7 +15,8 @@
 #include <boost/filesystem.hpp>
 
 static std::vector<std::wstring> const g_image_extensions = { L".jpg", L".jpeg", L".png",
-                                                              L".JPG", L".JPEG", L".PNG" };
+                                                              L".JPG", L".JPEG", L".PNG",
+                                                              L".gif", L".GIF" };
 
 static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr", L".RAR", L".CBR",
                                                                 L".zip", L".cbz", L".ZIP", L".CBZ",
