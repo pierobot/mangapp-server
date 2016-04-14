@@ -7,8 +7,8 @@ function reader_onload() {
 	var a_next_image = document.getElementById("next-image");
 	var a_prev_image = document.getElementById("prev-image");
 
-	a_next_image.onclick = function() { next_image(); };
-	a_prev_image.onclick = function() { prev_image(); };
+	a_next_image.addEventListener('click', function() { next_image(); });
+	a_prev_image.addEventListener('click', function() { prev_image(); });
 
 	$('.dropdown-menu li a').click(function() {
 		change_image(parseInt(this.text));
@@ -28,12 +28,19 @@ function reader_onload() {
 		var img_current = document.createElement("img");
 		img_current.setAttribute("src", image_urls[current_index]);
 		img_current.setAttribute("id", "img-current");
-		img_current.onload = function() {
+		img_current.addEventListener('load', function() {
 			window.scrollTo(document.body.scrollHeight, 0);
-		};
-		img_current.onclick = function() {
-			next_image();
-		};
+		});
+		img_current.addEventListener('click', function(event) {
+			if (event.offsetX < (this.width / 2)) {
+				// Left region
+				next_image();
+			}
+			else {
+				// Right region
+				prev_image();
+			}
+		});
 
 		var div_current_image =document.getElementById("current-image");
 		div_current_image.appendChild(img_current);
@@ -47,6 +54,9 @@ function next_image() {
 
 		var file_index = document.getElementById("file-index");
 		file_index.innerText = parseInt(file_index.innerText) + 1;
+
+		//var scroll_element = $('.dropdown-menu li')[current_index];
+		//$('#image-dropdown').scrollTo(scroll_element, 0);
 	}
 }
 
