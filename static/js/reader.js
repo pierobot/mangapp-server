@@ -12,6 +12,7 @@ function reader_onload() {
 
 	$('.dropdown-menu li a').click(function() {
 		change_image(parseInt(this.text));
+		this.scrollIntoView();
 	});
 
 	var div_image_list = document.getElementById("image-list");
@@ -33,14 +34,6 @@ function reader_onload() {
 		img_current.onclick = function() {
 			next_image();
 		};
-
-		/* var img_next = document.createElement("img");
-		img_next.setAttribute("src", image_urls[current_index + 1]);
-		img_next.setAttribute("id", "img-next");
-
-		var img_test = document.createElement("img");
-		img_test.setAttribute("src", image_urls[current_index + 1]);
-		img_test.setAttribute("id", "img-test"); */
 
 		var div_current_image =document.getElementById("current-image");
 		div_current_image.appendChild(img_current);
