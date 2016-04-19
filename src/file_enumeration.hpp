@@ -24,7 +24,7 @@ inline void enumerate_files(std::wstring const & path,
     if (callback_fn == nullptr)
         return;
 
-    for (auto current = directory_iterator(path); current != directory_iterator(); current++)
+    for (auto current = directory_iterator(path); current != directory_iterator(); ++current)
     {
         auto const & path_str = current->path().generic_wstring();
 

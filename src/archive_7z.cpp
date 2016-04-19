@@ -32,7 +32,7 @@ namespace mangapp
             if (SzArEx_Open(&m_data, &m_look_stream.s, &m_alloc, &m_tmp_alloc) == SZ_OK)
             {
                 // Yes, create the entries of the individual archive entries
-                for (UInt32 entry_index = 0; entry_index < m_data.NumFiles; entry_index++)
+                for (UInt32 entry_index = 0; entry_index < m_data.NumFiles; ++entry_index)
                 {
                     m_entries.emplace_back(new entry_7z(&m_data, &m_look_stream.s, &m_alloc, &m_tmp_alloc, entry_index));
                 }

@@ -14,7 +14,7 @@ namespace mangapp
         if (m_rar_handle != nullptr)
         {
             // Yes, iterate through the file or directory entries
-            for (uint64_t entry_index = 0; RARReadHeaderEx(m_rar_handle, &rar_header) == ERAR_SUCCESS; entry_index++)
+            for (uint64_t entry_index = 0; RARReadHeaderEx(m_rar_handle, &rar_header) == ERAR_SUCCESS; ++entry_index)
             {
                 // Test the flags to determine if it's a directory
                 bool is_dir = ((arc_data.Flags & RHDF_DIRECTORY) == RHDF_DIRECTORY);
