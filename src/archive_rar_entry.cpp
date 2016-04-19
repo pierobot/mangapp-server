@@ -38,7 +38,7 @@ namespace mangapp
             // Yes, supply our callback to unrar lib
             RARSetCallback(rar_handle, rar_callback, reinterpret_cast<LPARAM>(&rar_contents));
             // Iterate through all the entries
-            for (uint64_t entry_index = 0; RARReadHeaderEx(rar_handle, &rar_header) == ERAR_SUCCESS; entry_index++)
+            for (uint64_t entry_index = 0; RARReadHeaderEx(rar_handle, &rar_header) == ERAR_SUCCESS; ++entry_index)
             {
                 // If the entry index matches ours, extract the contents
                 if (entry_index == m_index)
