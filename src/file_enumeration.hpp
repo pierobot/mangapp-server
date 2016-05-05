@@ -30,16 +30,13 @@ inline void enumerate_files(std::wstring const & path,
 
         if (is_directory(path_str) == true)
         {
-            if (flags & file_search_flags::FlagDirectory)
+            if (recursive == true)
             {
-                if (recursive == true)
-                {
-                    enumerate_files(path_str, flags, recursive, callback_fn);
-                }
-                else
-                {
-                    callback_fn(path_str, file_search_flags::FlagDirectory);
-                }
+                enumerate_files(path_str, flags, recursive, callback_fn);
+            }
+            else if (flags & file_search_flags::FlagDirectory)
+            {
+                callback_fn(path_str, file_search_flags::FlagDirectory);
             }
         }
         else if (flags & file_search_flags::FlagFile)

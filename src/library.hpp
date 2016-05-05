@@ -187,7 +187,7 @@ namespace base
                 {
                     auto const & entry = value.get();
 
-                    if (is_in_container(g_archive_extensions, entry.get_extension()) == true)
+                    if (is_archive_extension(entry.get_extension()) == true)
                     {
                         std::wstring const & utf16_name(entry.get_name());
                         std::string utf8_name = to_utf8(utf16_name);
@@ -237,7 +237,7 @@ namespace base
 
                         for (auto const & image_entry : *archive_ptr)
                         {
-                            if (is_in_container(g_image_extensions, image_entry->extension()) == true)
+                            if (is_image_extension(image_entry->extension()) == true)
                             {
                                 image_array.emplace_back(mstch::map({
                                     { "key", std::to_string(key) },
@@ -372,8 +372,7 @@ namespace base
                         // Remove any file entries that are not images
                         archive_ptr->filter([key](mangapp::archive::entry_pointer const & entry_ptr) -> bool
                         {
-                            bool remove = is_in_container(g_image_extensions, entry_ptr->extension()) == false ||
-                                          entry_ptr->is_dir() == true;
+                            bool remove = is_image_extension(entry_ptr->extension()) == false || entry_ptr->is_dir() == true;
 
                             return remove;
                         });
