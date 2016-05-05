@@ -45,7 +45,7 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
 
 						 src/string.hpp
                          
-						 src/users.cpp src/users.hpp
+                         src/users.cpp src/users.hpp
                          src/utf8.cpp src/utf8.hpp
                          
                          src/image.cpp src/image.hpp
@@ -84,6 +84,7 @@ IF (MSVC)
                     -D_CRT_SECURE_NO_WARNINGS 
                     -D_SCL_SECURE_NO_WARNINGS
                     -DWIN32_LEAN_AND_MEAN
+                    -D_WIN32_WINNT=0x0601
                     -DCROW_MSVC_WORKAROUND
                     -DZIP_STATIC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819")

@@ -27,6 +27,8 @@ namespace
 
 namespace mangapp
 {
+    extern std::unordered_map<std::string, std::string> g_mangaupdates_cookies;
+
     server::server(uint16_t port, json11::Json const & json_settings, users & usrs, manga_library & library) :
         m_port(port),
         m_users(usrs),
@@ -143,6 +145,11 @@ namespace mangapp
                         context.insert(files_context.begin(), files_context.end());
 
                         auto details_template(read_file_contents("../static/html/details-template.html"));
+
+                        auto const session_iterator = g_mangaupdates_cookies.find("secure_session");
+                        if (session_iterator != g_mangaupdates_cookies.cend())
+                            response.add_header("Set-Cookie", "secure_session=" + session_iterator->second + ";" +
+                                                              "domain=www.mangaupdates.com");
 
                         response.write(mstch::render(details_template, context));
                     }
