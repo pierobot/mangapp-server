@@ -24,7 +24,7 @@ static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr"
 
 inline bool is_archive_extension(std::wstring const & extension)
 {
-    return std::find(g_archive_extensions.cbegin(), g_image_extensions.cend(), extension) != g_image_extensions.cend();
+    return std::find(g_archive_extensions.cbegin(), g_image_extensions.cend(), extension) != g_archive_extensions.cend();
 }
 
 inline bool is_image_extension(std::wstring const & extension)
