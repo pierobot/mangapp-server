@@ -22,10 +22,14 @@ static std::vector<std::wstring> const g_archive_extensions = { L".rar", L".cbr"
                                                                 L".zip", L".cbz", L".ZIP", L".CBZ",
                                                                 L".7z",  L".cb7", L".7Z", L".CB7" };
 
-template<class Container, class Element>
-bool is_in_container(Container const & container, Element const & element)
+inline bool is_archive_extension(std::wstring const & extension)
 {
-    return std::find(container.cbegin(), container.cend(), element) != container.cend();
+    return std::find(g_archive_extensions.cbegin(), g_image_extensions.cend(), extension) != g_image_extensions.cend();
+}
+
+inline bool is_image_extension(std::wstring const & extension)
+{
+    return std::find(g_image_extensions.cbegin(), g_image_extensions.cend(), extension) != g_image_extensions.cend();
 }
 
 namespace base
@@ -45,7 +49,7 @@ namespace base
             m_name(name),
             m_key(key)
         {
-            enumerate_files(path + name, file_search_flags::FlagFile, false,
+            enumerate_files(path + name, file_search_flags::FlagFile, true,
                 [this, &path](std::wstring const & file_path, file_search_flags flag)
             {
                 auto extension_start_pos = file_path.rfind(L'.');
@@ -53,8 +57,8 @@ namespace base
                 {
                     auto extension_str = file_path.substr(extension_start_pos);
                     // We only want archives and images
-                    if (is_in_container(g_archive_extensions, extension_str) == true ||
-                        is_in_container(g_image_extensions, extension_str) == true)
+                    if (is_archive_extension(extension_str) == true ||
+                        is_image_extension(extension_str) == true)
                     {
                         auto path_end_pos = file_path.rfind(L"/");
 
