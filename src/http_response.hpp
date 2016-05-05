@@ -13,8 +13,11 @@ namespace mangapp
         typedef std::unordered_multimap<std::string, std::string> headers_map_type;
         typedef std::vector<std::unordered_map<std::string, std::string>> cookies_vector_type;
 
+        http_response() = delete;
         http_response(std::string && contents);
         ~http_response();
+
+        http_response & operator=(http_response const &) = delete;
 
         int32_t const get_code() const;
         headers_map_type const & get_headers() const;
