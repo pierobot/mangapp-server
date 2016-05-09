@@ -32,6 +32,8 @@ namespace mangapp
         virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event) final;
     private:
         http_client m_http_client;
+
+        void get_mangaupdates_cookie();
     };
 }
 
