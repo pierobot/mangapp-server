@@ -25,8 +25,11 @@ namespace mangapp
         typedef std::map<std::string, std::string> parameters_map_type;
         typedef std::unordered_multimap<std::string, std::string> headers_map_type;
 
+        http_request() = delete;
         http_request(http_protocol protocol, http_action action, std::string host, std::string url);
         ~http_request();
+
+        http_request & operator=(http_request const &) = delete;
 
         void add_parameter(std::string key, std::string value);
         void add_header(std::string name, std::string value);
