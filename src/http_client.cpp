@@ -8,26 +8,44 @@
 
 namespace mangapp
 {
-    http_client::http_client(http_version version) :
+    http_client::http_client(http_version version, uint8_t max_sockets) :
         m_version(version),
+        m_max_sockets(m_max_sockets),
         m_is_running(true),
         m_thread(),
-        m_io_service(),
-        m_infinite_work(new boost::asio::io_service::work(m_io_service))
+        m_io_service()/*,
+        m_infinite_work(new boost::asio::io_service::work(m_io_service))*/
     {
         m_thread = std::thread([this]()
         {
             while (m_is_running == true)
             {
                 m_io_service.poll();
-                
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                // Do any pending socket work
+                m_io_service.post([this]() -> void
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex_work);
+                    if (m_pending_work.size() > 0)
+                    {
+                        if (m_socket_count < m_max_sockets)
+                        {
+                            auto work_function = m_pending_work.front();
+                            m_pending_work.pop();
+
+                            work_function();
+                        }
+                    }
+                });
             }
         });
     }
 
     http_client::~http_client()
     {
+        m_is_running = false;
+        m_io_service.stop();
+        m_thread.join();
     }
 
     bool http_client::default_verify(bool preverified, boost::asio::ssl::verify_context & context)
@@ -233,7 +251,18 @@ namespace mangapp
             }
         };
 
-        work_function();
+        // Are we under the socket limit?
+        if (m_socket_count < m_max_sockets)
+        {
+            // Yes, just do the work
+            work_function();
+        }
+        else
+        {
+            // Nope, we've exceeded the limit, so add it to the pending queue
+            std::lock_guard<std::mutex> lock(m_mutex_work);
+            m_pending_work.emplace(work_function);
+        }
     }
 
     void http_client::on_connect(context_pointer context)

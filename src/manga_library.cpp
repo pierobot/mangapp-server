@@ -150,7 +150,6 @@ namespace mangapp
             }
 
             request_id->add_parameter("id", series_id);
-
             request_id->add_header("Accept", "text/html");
             request_id->add_header("Accept-Encoding", "gzip, deflate");
             request_id->add_header("Connection", "close");
