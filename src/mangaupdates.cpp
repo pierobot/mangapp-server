@@ -84,14 +84,16 @@ namespace
         return v1[t.length()];
     }
 
-    unsigned int const get_num_pages(std::string const & contents)
+    unsigned int const get_num_pages(std::string const & contents, size_t & current_pos)
     {
-        size_t page_start_pos = contents.find(page_search_str);
+        size_t page_start_pos = contents.find(page_search_str, current_pos);
         if (page_start_pos != std::string::npos)
         {
+            current_pos = page_start_pos;
             size_t page_end_pos = contents.find(")", page_start_pos);
             if (page_end_pos != std::string::npos)
             {
+                current_pos = page_end_pos;
                 return std::stoi(contents.substr(page_start_pos, page_end_pos - page_start_pos));
             }
         }
@@ -99,7 +101,7 @@ namespace
         return 0;
     }
 
-    std::string const get_id(std::string const & contents, std::string const & name)
+    std::string const get_id(std::string const & contents, std::string const & name, size_t & current_pos)
     {
         using match_type = std::pair<float, std::string>;
         std::vector<match_type> matches;
@@ -107,23 +109,26 @@ namespace
 
         // mangaupdates sends the names NCR encoded, so we must encode ours to NCR as well
         auto ncr_name = http_utility::encode_ncr(name);
-        size_t id_start_pos = contents.find(id_search_str);
+        size_t id_start_pos = contents.find(id_search_str, current_pos);
         // Iterate through every search result entry
         while (id_start_pos != std::string::npos)
         {
-            id_start_pos += id_search_str.length();
+            current_pos = id_start_pos += id_search_str.length();
             size_t id_end_pos = contents.find("'", id_start_pos);
             if (id_end_pos == std::string::npos)
                 break;
 
+            current_pos = id_end_pos;
             id = contents.substr(id_start_pos, id_end_pos - id_start_pos);
             size_t name_start_pos = contents.find(name_entry_search_str, id_start_pos);
             if (name_start_pos != std::string::npos)
             {
-                name_start_pos += name_entry_search_str.length();
+                current_pos = name_start_pos += name_entry_search_str.length();
                 size_t name_end_pos = contents.find("</a>", name_start_pos);
                 if (name_end_pos == std::string::npos)
                     break;
+
+                current_pos = name_end_pos;
                 // Get the string from positions and remove any junk
                 auto potential_match = contents.substr(name_start_pos, name_end_pos - name_start_pos);
                 potential_match = find_remove_junk(potential_match, NAME_SEARCH);
@@ -150,34 +155,38 @@ namespace
         return matches.size() > 0 ? matches.front().second : "";
     }
 
-    std::string const get_description(std::string const & contents)
+    std::string const get_description(std::string const & contents, size_t & current_pos)
     {
         std::string description;
 
-        size_t start_pos = contents.find(desc_search_str);
+        size_t start_pos = contents.find(desc_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += desc_search_str.length();
 
-            start_pos = contents.find(">", start_pos);
+            current_pos = start_pos = contents.find(">", start_pos);
             if (start_pos != std::string::npos)
             {
                 ++start_pos;
 
                 size_t end_pos = contents.find("</div>", start_pos);
                 if (end_pos != std::string::npos)
+                {
                     description = contents.substr(start_pos, end_pos - start_pos);
+                }
+
+                current_pos = end_pos;
             }
         }
 
         return description;
     }
 
-    std::vector<std::string> const get_associated_names(std::string const & contents)
+    std::vector<std::string> const get_associated_names(std::string const & contents, size_t & current_pos)
     {
         std::vector<std::string> associated_names;
 
-        size_t start_pos = contents.find(ass_names_search_str);
+        size_t start_pos = contents.find(ass_names_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += ass_names_search_str.length();
@@ -195,7 +204,7 @@ namespace
 
                     for (size_t i = 0; start_pos < div_end_pos; i++)
                     {
-                        end_pos = contents.find("<br />", start_pos);
+                        current_pos = end_pos = contents.find("<br />", start_pos);
                         if (end_pos == std::string::npos)
                             break;
 
@@ -209,11 +218,11 @@ namespace
         return associated_names;
     }
 
-    std::vector<std::string> const get_genres(std::string const & contents)
+    std::vector<std::string> const get_genres(std::string const & contents, size_t & current_pos)
     {
         std::vector<std::string> genres;
 
-        size_t start_pos = contents.find(genres_search_str);
+        size_t start_pos = contents.find(genres_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += genres_search_str.length();
@@ -223,6 +232,7 @@ namespace
             if (div_end_pos != std::string::npos)
             {
                 --div_end_pos;
+                current_pos = div_end_pos;
 
                 for (size_t i = 0; start_pos < div_end_pos; i++)
                 {
@@ -236,7 +246,7 @@ namespace
                         break;
 
                     genres.emplace_back(contents.substr(start_pos, end_pos - start_pos));
-                    start_pos = end_pos + 4;
+                    current_pos = start_pos = end_pos + 4;
                 }
 
                 /* ******** IMPROVE THIS ******  */
@@ -250,21 +260,23 @@ namespace
         return genres;
     }
 
-    std::vector<std::string> const get_authors(std::string const & contents)
+    std::vector<std::string> const get_authors(std::string const & contents, size_t & current_pos)
     {
         std::vector<std::string> authors;
 
-        size_t start_pos = contents.find(authors_search_str);
+        size_t start_pos = contents.find(authors_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += authors_search_str.length();
 
             size_t end_pos = 0;
             size_t div_end_pos = contents.find("</div>", start_pos);
-
+            current_pos = start_pos;
+            
             if (div_end_pos != std::string::npos)
             {
                 --div_end_pos;
+                current_pos = div_end_pos;
 
                 for (size_t i = 0; start_pos < div_end_pos; i++)
                 {
@@ -278,7 +290,7 @@ namespace
                         break;
 
                     authors.emplace_back(contents.substr(start_pos, end_pos - start_pos));
-                    start_pos = end_pos + 12;
+                    current_pos = start_pos = end_pos + 12;
                 }
             }
         }
@@ -286,20 +298,22 @@ namespace
         return authors;
     }
 
-    std::vector<std::string> const get_artists(std::string const & contents)
+    std::vector<std::string> const get_artists(std::string const & contents, size_t & current_pos)
     {
         std::vector<std::string> artists;
 
-        size_t start_pos = contents.find(artists_search_str);
+        size_t start_pos = contents.find(artists_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += artists_search_str.length();
+            current_pos = start_pos;
 
             size_t end_pos = 0;
             size_t div_end_pos = contents.find("</div>", start_pos);
             if (div_end_pos != std::string::npos)
             {
                 --div_end_pos;
+                current_pos = div_end_pos;
 
                 for (size_t i = 0; start_pos < div_end_pos; i++)
                 {
@@ -313,7 +327,7 @@ namespace
                         break;
 
                     artists.emplace_back(contents.substr(start_pos, end_pos - start_pos));
-                    start_pos = end_pos + 12;
+                    current_pos = start_pos = end_pos + 12;
                 }
             }
         }
@@ -321,22 +335,22 @@ namespace
         return artists;
     }
 
-    std::string const get_year(std::string const & contents)
+    std::string const get_year(std::string const & contents, size_t & current_pos)
     {
         std::string year;
 
         size_t start_pos = contents.find(year_search_str);
         if (start_pos != std::string::npos)
         {
-            start_pos += year_search_str.length();
+            current_pos = start_pos += year_search_str.length();
             start_pos = contents.find(">", start_pos);
             if (start_pos != std::string::npos)
             {
-                ++start_pos;
+                current_pos = ++start_pos;
                 size_t end_pos = contents.find("</div>", start_pos);
                 if (end_pos != std::string::npos)
                 {
-                    --end_pos; // new line character
+                    current_pos = --end_pos; // new line character
                     year = contents.substr(start_pos, end_pos - start_pos);
                 }
             }
@@ -345,21 +359,23 @@ namespace
         return year;
     }
 
-    std::string const get_img_url(std::string const & contents)
+    std::string const get_img_url(std::string const & contents, size_t & current_pos)
     {
         std::string img_url;
 
-        size_t start_pos = contents.find(img_search_str);
+        size_t start_pos = contents.find(img_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             start_pos += img_search_str.length();
+            current_pos = start_pos;
             start_pos = contents.find("src='", start_pos);
             if (start_pos != std::string::npos)
             {
-                start_pos += 5;
+                current_pos = start_pos += 5;
                 size_t end_pos = contents.find('\'', start_pos);
                 if (end_pos != std::string::npos)
                 {
+                    current_pos = end_pos;
                     img_url = contents.substr(start_pos, end_pos - start_pos);
                 }
             }
@@ -373,14 +389,15 @@ namespace mangaupdates
 {
     series::series(std::string const & contents, std::string const & name, size_t key, std::string const & id) :
         m_key(key),
-        m_id(id.empty() ? ::get_id(contents, name) : id),
-        m_description(::get_description(contents)),
-        m_assoc_names(::get_associated_names(contents)),
-        m_genres(::get_genres(contents)),
-        m_authors(::get_authors(contents)),
-        m_artists(::get_artists(contents)),
-        m_year(::get_year(contents)),
-        m_img_url(::get_img_url(contents))
+        m_current_pos(0),
+        m_id(id.empty() ? ::get_id(contents, name, m_current_pos) : id),
+        m_description(::get_description(contents, m_current_pos)),
+        m_assoc_names(::get_associated_names(contents, m_current_pos)),
+        m_img_url(::get_img_url(contents, m_current_pos)),
+        m_genres(::get_genres(contents, m_current_pos)),
+        m_authors(::get_authors(contents, m_current_pos)),
+        m_artists(::get_artists(contents, m_current_pos)),
+        m_year(::get_year(contents, m_current_pos))
     {
     }
 
@@ -394,6 +411,7 @@ namespace mangaupdates
                    std::string && year,
                    std::string && img_url) :
         m_key(key),
+        m_current_pos(-1),
         m_id(id),
         m_description(description),
         m_assoc_names(assoc_names),
@@ -407,6 +425,7 @@ namespace mangaupdates
 
     series::series(series && s) :
         m_key(s.m_key),
+        m_current_pos(-1),
         m_id(std::move(s.m_id)),
         m_description(std::move(s.m_description)),
         m_assoc_names(std::move(s.m_assoc_names)),
@@ -421,6 +440,7 @@ namespace mangaupdates
     series & series::operator=(series && s)
     {
         m_key = std::move(s.m_key);
+        m_current_pos = -1;
         m_id = std::move(s.m_id);
         m_description = std::move(s.m_description);
         m_assoc_names = std::move(s.m_assoc_names);
