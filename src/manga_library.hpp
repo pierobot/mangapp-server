@@ -6,9 +6,6 @@
 #include "manga_entry.hpp"
 #include "http_client.hpp"
 
-#include <string>
-#include <vector>
-
 namespace json11
 {
     class Json;
