@@ -26,9 +26,9 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/directory_file_entry.cpp src/directory_file_entry.hpp
                          src/file_enumeration.hpp
                          
-						 src/http_client.cpp src/http_client.hpp
-						 src/http_request.cpp src/http_request.hpp
-						 src/http_response.cpp src/http_response.hpp
+                         src/http_client.cpp src/http_client.hpp
+                         src/http_request.cpp src/http_request.hpp
+                         src/http_response.cpp src/http_response.hpp
                          src/http_utility.cpp src/http_utility.hpp
                          
                          src/library.hpp
@@ -38,7 +38,7 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/manga_entry.cpp src/manga_entry.hpp
                          src/manga_library.cpp src/manga_library.hpp
                          
-                         src/mangaupdates_parser.cpp src/mangaupdates_parser.hpp
+                         src/mangaupdates.cpp src/mangaupdates.hpp
                          
                          src/server.cpp src/server.hpp
                          src/sort.hpp
