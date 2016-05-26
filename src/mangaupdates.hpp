@@ -39,14 +39,16 @@ namespace mangaupdates
     protected:
     private:
         size_t m_key;
+        size_t m_current_pos;
+        float m_levenshtein_distance;
         std::string m_id;
         std::string m_description;
         std::vector<std::string> m_assoc_names;
+        std::string m_img_url;
         std::vector<std::string> m_genres;
         std::vector<std::string> m_authors;
         std::vector<std::string> m_artists;
         std::string m_year;
-        std::string m_img_url;
     };
 };
 
