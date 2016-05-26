@@ -1,6 +1,6 @@
 #include "manga_library.hpp"
 #include "http_utility.hpp"
-#include "mangaupdates_parser.hpp"
+#include "mangaupdates.hpp"
 #include "utf8.hpp"
 #include "http_request.hpp"
 
@@ -135,7 +135,8 @@ namespace mangapp
                 on_error(message);
             }
 
-            auto series_id = mangaupdates::get_id(response->get_body(), name);
+            mangaupdates::series series(response->get_body(), name, key);
+            auto series_id = series.get_id();
             if (series_id.empty() == true)
             {
                 on_error(std::string(__func__) + " - Unable to find manga with name: " + name);
@@ -158,7 +159,7 @@ namespace mangapp
             request_id->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
 
             m_http_client.send(std::move(request_id),
-                [this, key, series_id, on_error, on_event](http_client::response_pointer && response)
+                [this, key, name, series_id, on_error, on_event](http_client::response_pointer && response)
             {
                 if (response->get_code() != 200)
                 {
@@ -167,17 +168,14 @@ namespace mangapp
                 }
 
                 auto const & contents = response->get_body();
-                auto associated_names = mangaupdates::get_associated_names(contents);
-                auto description = mangaupdates::get_description(contents);
-                auto genres = mangaupdates::get_genres(contents);
-                auto authors = mangaupdates::get_authors(contents);
-                auto artists = mangaupdates::get_artists(contents);
-                auto year = mangaupdates::get_year(contents);
-                auto img_url = mangaupdates::get_img_url(contents);
-
-                // In the case no image url is found, get from either the archive or folder.jpeg
-                if (img_url.empty() == true)
-                    img_url = std::string("/mangapp/thumbnail/") + std::to_string(key);
+                mangaupdates::series series(contents, name, key, series_id);
+                auto const & associated_names = series.get_associated_names();
+                auto const & description = series.get_description();
+                auto const & genres = series.get_genres();
+                auto const & authors = series.get_authors();
+                auto const & artists = series.get_artists();
+                auto const & year = series.get_year();
+                auto const & img_url = series.get_img_url();
 
                 mstch::array names_array;
                 for (auto const & name : associated_names)
