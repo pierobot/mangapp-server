@@ -92,7 +92,7 @@ namespace mangapp
         typedef std::function<void(std::string const &)> error_function;
         typedef std::function<void(response_pointer &&)> ready_function;
 
-        http_client(http_version version);
+        http_client(http_version version, uint8_t max_sockets = 8);
         ~http_client();
 
         void send(request_pointer request, ready_function on_ready, error_function on_error);
