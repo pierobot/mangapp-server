@@ -14,11 +14,11 @@ namespace mangaupdates
                std::string && id,
                std::string && description,
                std::vector<std::string> && assoc_names,
+               std::string && img_url,
                std::vector<std::string> && genres,
                std::vector<std::string> && authors,
                std::vector<std::string> && artists,
-               std::string && year,
-               std::string && img_url);
+               std::string && year);
         series(series const &) = delete;
         series(series && s);
 

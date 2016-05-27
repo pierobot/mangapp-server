@@ -405,21 +405,21 @@ namespace mangaupdates
                    std::string && id,
                    std::string && description,
                    std::vector<std::string> && assoc_names,
+                   std::string && img_url,
                    std::vector<std::string> && genres,
                    std::vector<std::string> && authors,
                    std::vector<std::string> && artists,
-                   std::string && year,
-                   std::string && img_url) :
+                   std::string && year) :
         m_key(key),
         m_current_pos(-1),
         m_id(id),
         m_description(description),
         m_assoc_names(assoc_names),
+        m_img_url(img_url.empty() ? std::string("/mangapp/thumbnail/") + std::to_string(key) : img_url),
         m_genres(genres),
         m_authors(authors),
         m_artists(artists),
-        m_year(year),
-        m_img_url(img_url.empty() ? std::string("/mangapp/thumbnail/") + std::to_string(key) : img_url)
+        m_year(year)
     {
     }
 
