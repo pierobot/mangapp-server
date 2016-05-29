@@ -26,10 +26,15 @@ namespace mangapp
         manga_library(json11::Json const & library_paths, mangapp::users & usrs);
         virtual ~manga_library();
     protected:
-        virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event) final;
+        void search_title(manga_directory & manga,
+                          std::function<void(std::string)> on_event,
+                          unsigned int start_page = 1,
+                          unsigned int max_pages = 5);
+        virtual void search_online_source(manga_directory & manga, std::function<void(mstch::map&&, bool)> on_event) final;
     private:
         http_client m_http_client;
 
+        void request_page(std::string const & name, unsigned int page_index, std::function<void(http_client::response_pointer &&)> on_event);
         void get_mangaupdates_cookie();
     };
 }
