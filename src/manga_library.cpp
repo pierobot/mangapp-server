@@ -140,20 +140,28 @@ namespace mangapp
             std::string const & contents = response_ptr->get_body();
             unsigned int num_pages = mangaupdates::get_num_pages(contents);           
             auto page_matches = mangaupdates::get_page_matches(contents, name);
-            // Is there a perfect match?
-            if (page_matches.front().first == 1.0f)
+            if (page_matches.size() > 0)
             {
-                // Yes, we have the id
-                on_event(page_matches.front().second);
+                // Is there a perfect match?
+                if (page_matches.front().first == 1.0f)
+                {
+                    // Yes, we have the id
+                    on_event(page_matches.front().second);
+                }
+                else
+                {
+                    // No, keep the results and try again on the next page
+                    manga.get_series().add_possible_matches(std::move(page_matches));
+                    if (++start_page <= max_pages)
+                        search_title(manga, on_event, start_page, max_pages);
+                    else
+                        on_event(manga.get_series().get_best_match().second);
+                }
             }
             else
             {
-                // No, keep the results and try again on the next page
-                manga.get_series().add_possible_matches(std::move(page_matches));
-                if (++start_page <= max_pages)
-                    search_title(manga, on_event, start_page, max_pages);
-                else
-                    on_event(manga.get_series().get_best_match().second);
+                // We found nothing
+                on_event("");
             }
         });
     }
@@ -170,10 +178,17 @@ namespace mangapp
 
         auto on_id = [this, &manga, on_event, on_error](std::string id) -> void
         {
+            if (id.empty() == true)
+            {
+                on_error(std::string(__func__) + " - Unable to find id for " + to_utf8(manga.get_name()));
+                return;
+            }
+
             http_client::request_pointer request_id(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/series.html"));
             if (request_id == nullptr)
             {
                 on_error(std::string(__func__) + " - Unable to allocate http_client::request_pointer.");
+                return;
             }
 
             request_id->add_parameter("id", id);
