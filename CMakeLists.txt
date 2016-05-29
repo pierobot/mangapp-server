@@ -70,10 +70,12 @@ FILE(GLOB 7Z_SOURCES thirdparty/7z/7zAlloc.c
                      thirdparty/7z/LzmaDec.c
                      thirdparty/7z/Ppmd7.c
                      thirdparty/7z/Ppmd7Dec.c)
+FILE(GLOB JAROWINKLER_SOURCES thirdparty/Jaro-Winkler/jaroWinkler.cpp thirdparty/Jaro-Winkler/jaroWinkler.hpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES} 
                                ${JSON11_SOURCES}
-                               ${SERVER_SOURCES})
+                               ${SERVER_SOURCES}
+							   ${JAROWINKLER_SOURCES})
 
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} thirdparty)

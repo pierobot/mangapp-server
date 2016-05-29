@@ -3,8 +3,7 @@
 
 #include "directory_entry.hpp"
 #include "manga_entry.hpp"
-
-#include <string>
+#include "mangaupdates.hpp"
 
 namespace mangapp
 {
@@ -15,9 +14,10 @@ namespace mangapp
         
         virtual ~manga_directory();
 
-
+        mangaupdates::series & get_series() { return m_series; }
     protected:
     private:
+        mangaupdates::series m_series;
     };
 }
 
