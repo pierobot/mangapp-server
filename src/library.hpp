@@ -59,6 +59,7 @@ namespace base
         typedef typename DirectoryEntryType::file_entry_type file_entry_type;
 
         typedef std::unordered_map<key_type, directory_entry_type> library_map_type;
+        typedef typename library_map_type::iterator iterator;
         typedef typename library_map_type::const_iterator const_iterator;
 
         /**
@@ -101,6 +102,16 @@ namespace base
         {
         }
 
+        iterator begin()
+        {
+            return m_entries.begin();
+        }
+
+        iterator end()
+        {
+            return m_entries.end();
+        }
+
         const_iterator cbegin() const
         {
             return m_entries.cbegin();
@@ -109,6 +120,11 @@ namespace base
         const_iterator cend() const
         {
             return m_entries.cend();
+        }
+
+        iterator find(key_type key)
+        {
+            return m_entries.find(key);
         }
 
         const_iterator find(key_type key) const
@@ -158,7 +174,7 @@ namespace base
 
         mstch::map get_files_context(std::string const & session_id, key_type key) const
         {
-            auto manga_comic_iterator = library::find(key);
+            auto const manga_comic_iterator = library::find(key);
             if (manga_comic_iterator != library::cend())
             {
                 size_t path_key = boost::hash<std::wstring>()(manga_comic_iterator->second.get_path());
@@ -216,7 +232,7 @@ namespace base
 
         mstch::map const get_reader_context(std::string const & session_id, key_type key, key_type file_key) const
         {
-            auto entry_iterator = find(key);
+            auto const entry_iterator = find(key);
             if (entry_iterator != cend())
             {
                 size_t path_key = boost::hash<std::wstring>()(entry_iterator->second.get_path());
@@ -279,7 +295,7 @@ namespace base
         {
             std::string thumb_data;
 
-            auto manga_comic_iterator = find(key);
+            auto const manga_comic_iterator = find(key);
             // Does the specified key exist in our map?
             if (manga_comic_iterator != cend())
             {
@@ -329,13 +345,10 @@ namespace base
         {
             // Is the key valid?
             auto manga_comic_iterator = library::find(key);
-            if (manga_comic_iterator != library::cend())
+            if (manga_comic_iterator != library::end())
             {
                 // Yes, proceed
-                std::wstring const & wname = manga_comic_iterator->second.get_name();
-                std::string mbname = to_utf8(wname);
-
-                search_online_source(key, mbname, on_event);
+                search_online_source(manga_comic_iterator->second, on_event);
             }
         }
 
@@ -352,7 +365,7 @@ namespace base
             std::string image_contents;
 
             // Is the manga key valid?
-            auto manga_comic_iterator = library::find(key);
+            auto const manga_comic_iterator = library::find(key);
             if (manga_comic_iterator != library::cend())
             {
                 size_t path_key = boost::hash<std::wstring>()(manga_comic_iterator->second.get_path());
@@ -392,14 +405,7 @@ namespace base
             return image_contents;
         }
     protected:
-        /**
-        *   Function that asynchronously searches an online source for the supplied name of the manga/comic.
-        *   The results are stored in a mstch::map object and passed to the 'on_event' callback.
-        *
-        *   @param name the name of the manga/comic
-        *   @param on_event a callback that handles the mstch::map object
-        */
-        virtual void search_online_source(key_type key, std::string const & name, std::function<void(mstch::map&&, bool)> on_event)
+        virtual void search_online_source(directory_entry_type & entry, std::function<void(mstch::map&&, bool)> on_event)
         {
         }
     private:
