@@ -2,28 +2,12 @@
 #include "http_utility.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 #include <utf8/utf8.h>
 
 namespace
 {
-    static std::string const name_entry_search_str = "alt='Series Info'>";
-    static std::string const page_search_str = "class='specialtext' nowrap>Pages (";
-    static std::string const id_search_str = "www.mangaupdates.com/series.html?id=";
-    static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
-    static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
-    static std::string const genres_search_str = "act=genresearch&amp;genre=";
-    static std::string const authors_search_str = "<div class=\"sCat\"><b>Author(s)</b></div>";
-    static std::string const artists_search_str = "<div class=\"sCat\"><b>Artist(s)</b></div>";
-    static std::string const year_search_str = "<div class=\"sCat\"><b>Year</b></div>";
-    static std::string const img_search_str = "<div class=\"sContent\" ><center><img";
-
-    static std::pair<std::string, std::string> const junk_table[] =
-    {
-        { "<i>", "</i>" },  // Name junk in search results
-        { "&nbsp; [", "]" } // Artists and Authors junk
-    };
-
     enum junk_type
     {
         NAME_SEARCH = 0,
@@ -32,6 +16,12 @@ namespace
 
     static std::string & find_remove_junk(std::string & str, junk_type type)
     {
+        static std::pair<std::string, std::string> const junk_table[] =
+        {
+            { "<i>", "</i>" },  // Name junk in search results
+            { "&nbsp; [", "]" } // Artists and Authors junk
+        };
+
         auto const & start_pattern = junk_table[type].first;
         auto const & end_pattern = junk_table[type].second;
 
@@ -84,29 +74,14 @@ namespace
         return v1[t.length()];
     }
 
-    unsigned int const get_num_pages(std::string const & contents, size_t & current_pos)
-    {
-        size_t page_start_pos = contents.find(page_search_str, current_pos);
-        if (page_start_pos != std::string::npos)
-        {
-            current_pos = page_start_pos;
-            size_t page_end_pos = contents.find(")", page_start_pos);
-            if (page_end_pos != std::string::npos)
-            {
-                current_pos = page_end_pos;
-                return std::stoi(contents.substr(page_start_pos, page_end_pos - page_start_pos));
-            }
-        }
-
-        return 0;
-    }
-
     std::string const get_id(std::string const & contents, std::string const & name, size_t & current_pos)
     {
+        static std::string const id_search_str = "www.mangaupdates.com/series.html?id=";
+        static std::string const name_entry_search_str = "alt='Series Info'>";
+
         using match_type = std::pair<float, std::string>;
         std::vector<match_type> matches;
         std::string id;
-
         // mangaupdates sends the names NCR encoded, so we must encode ours to NCR as well
         auto ncr_name = http_utility::encode_ncr(name);
         size_t id_start_pos = contents.find(id_search_str, current_pos);
@@ -157,6 +132,7 @@ namespace
 
     std::string const get_description(std::string const & contents, size_t & current_pos)
     {
+        static std::string const desc_search_str = "<div class=\"sCat\"><b>Description</b></div>";
         std::string description;
 
         size_t start_pos = contents.find(desc_search_str, current_pos);
@@ -184,6 +160,7 @@ namespace
 
     std::vector<std::string> const get_associated_names(std::string const & contents, size_t & current_pos)
     {
+        static std::string const ass_names_search_str = "<div class=\"sCat\"><b>Associated Names</b></div>";
         std::vector<std::string> associated_names;
 
         size_t start_pos = contents.find(ass_names_search_str, current_pos);
@@ -220,6 +197,7 @@ namespace
 
     std::vector<std::string> const get_genres(std::string const & contents, size_t & current_pos)
     {
+        static std::string const genres_search_str = "act=genresearch&amp;genre=";
         std::vector<std::string> genres;
 
         size_t start_pos = contents.find(genres_search_str, current_pos);
@@ -262,6 +240,7 @@ namespace
 
     std::vector<std::string> const get_authors(std::string const & contents, size_t & current_pos)
     {
+        static std::string const authors_search_str = "<div class=\"sCat\"><b>Author(s)</b></div>";
         std::vector<std::string> authors;
 
         size_t start_pos = contents.find(authors_search_str, current_pos);
@@ -300,6 +279,7 @@ namespace
 
     std::vector<std::string> const get_artists(std::string const & contents, size_t & current_pos)
     {
+        static std::string const artists_search_str = "<div class=\"sCat\"><b>Artist(s)</b></div>";
         std::vector<std::string> artists;
 
         size_t start_pos = contents.find(artists_search_str, current_pos);
@@ -337,9 +317,10 @@ namespace
 
     std::string const get_year(std::string const & contents, size_t & current_pos)
     {
+        static std::string const year_search_str = "<div class=\"sCat\"><b>Year</b></div>";
         std::string year;
 
-        size_t start_pos = contents.find(year_search_str);
+        size_t start_pos = contents.find(year_search_str, current_pos);
         if (start_pos != std::string::npos)
         {
             current_pos = start_pos += year_search_str.length();
@@ -361,6 +342,7 @@ namespace
 
     std::string const get_img_url(std::string const & contents, size_t & current_pos)
     {
+        static std::string const img_search_str = "<div class=\"sContent\" ><center><img";
         std::string img_url;
 
         size_t start_pos = contents.find(img_search_str, current_pos);
@@ -387,6 +369,83 @@ namespace
 
 namespace mangaupdates
 {
+    unsigned int const get_num_pages(std::string const & contents)
+    {
+        static std::string const page_search_str = "class='specialtext' nowrap>Pages (";
+
+        size_t page_start_pos = contents.find(page_search_str);
+        if (page_start_pos != std::string::npos)
+        {
+            page_start_pos += page_search_str.length();
+            size_t page_end_pos = contents.find(")", page_start_pos);
+            if (page_end_pos != std::string::npos)
+            {
+                auto num_pages = contents.substr(page_start_pos, page_end_pos - page_start_pos);
+                return std::stoi(num_pages);
+            }
+        }
+
+        return 0;
+    }
+
+    auto get_page_matches(std::string const & contents, std::string const & name) -> std::vector<std::pair<float, std::string>>
+    {
+        static std::string const id_search_str = "www.mangaupdates.com/series.html?id=";
+        static std::string const name_entry_search_str = "alt='Series Info'>";
+        using match_type = std::pair<float, std::string>;
+
+        std::vector<match_type> matches;
+        std::string id;
+        // mangaupdates sends the names NCR encoded, so we must encode ours to NCR as well
+        auto ncr_name = http_utility::encode_ncr(name);
+        size_t id_start_pos = contents.find(id_search_str);
+        // Iterate through every search result entry
+        while (id_start_pos != std::string::npos)
+        {
+            id_start_pos += id_search_str.length();
+            size_t id_end_pos = contents.find("'", id_start_pos);
+            if (id_end_pos == std::string::npos)
+                break;
+
+            id = contents.substr(id_start_pos, id_end_pos - id_start_pos);
+            size_t name_start_pos = contents.find(name_entry_search_str, id_start_pos);
+            if (name_start_pos != std::string::npos)
+            {
+                name_start_pos += name_entry_search_str.length();
+                size_t name_end_pos = contents.find("</a>", name_start_pos);
+                if (name_end_pos == std::string::npos)
+                    break;
+
+                // Get the string from positions and remove any junk
+                auto potential_match = contents.substr(name_start_pos, name_end_pos - name_start_pos);
+                potential_match = find_remove_junk(potential_match, NAME_SEARCH);
+                auto larger_length = std::max(potential_match.length(), name.length());
+                auto match_percentage = static_cast<float>(jaroWinklerDistance(potential_match, name));
+                /*auto match_percentage = 1.0f - (static_cast<float>(levenshtein_distance(potential_match, name)) / larger_length);*/
+
+                matches.emplace_back(match_percentage, id);
+                // Do the names match?
+                if (potential_match == ncr_name)
+                    break;
+            }
+
+            id_start_pos = contents.find(id_search_str, id_start_pos);
+        }
+
+        // Sort the potential matches based on their match percentage; the frontmost being the highest
+        std::sort(matches.begin(), matches.end(),
+            [](match_type const & left, match_type const & right) -> bool
+        {
+            return left.first > right.first;
+        });
+
+        return matches;
+    }
+
+    series::series()
+    {
+    }
+
     series::series(std::string const & contents, std::string const & name, size_t key, std::string const & id) :
         m_key(key),
         m_current_pos(0),
@@ -423,6 +482,20 @@ namespace mangaupdates
     {
     }
 
+    series::series(series const & s) :
+        m_key(s.m_key),
+        m_current_pos(-1),
+        m_id(s.m_id),
+        m_description(s.m_description),
+        m_assoc_names(s.m_assoc_names),
+        m_genres(s.m_genres),
+        m_authors(s.m_authors),
+        m_artists(s.m_artists),
+        m_year(s.m_year),
+        m_img_url(s.m_img_url)
+    {
+    }
+
     series::series(series && s) :
         m_key(s.m_key),
         m_current_pos(-1),
@@ -455,5 +528,20 @@ namespace mangaupdates
 
     series::~series()
     {
+    }
+
+    void series::add_possible_matches(std::vector<match_type> && matches)
+    {
+        std::copy(matches.begin(), matches.end(), std::back_inserter(m_matches));
+    }
+    
+    series::match_type const series::get_best_match() const
+    {
+        match_type best_match;
+
+        if (m_matches.size() > 0)
+            best_match = m_matches.front();
+
+        return best_match;
     }
 }

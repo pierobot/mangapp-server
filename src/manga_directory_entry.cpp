@@ -3,6 +3,7 @@
 namespace mangapp
 {
     manga_directory::manga_directory(std::wstring const & path, std::wstring const & name, size_t key) :
+        m_series(),
         base::directory_entry<manga_entry>(path, name, key)
     {
     }

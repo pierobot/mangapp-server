@@ -4,11 +4,19 @@
 #include <string>
 #include <vector>
 
+#include <Jaro-Winkler/jaroWinkler.hpp>
+
 namespace mangaupdates
 {
+    unsigned int const get_num_pages(std::string const & contents);
+    auto get_page_matches(std::string const & contents, std::string const & name) -> std::vector<std::pair<float, std::string>>;
+
     class series
     {
     public:
+        typedef std::pair<float, std::string> match_type;
+
+        series();
         series(std::string const & contents, std::string const & name, size_t key, std::string const & id = "");
         series(size_t key,
                std::string && id,
@@ -19,7 +27,7 @@ namespace mangaupdates
                std::vector<std::string> && authors,
                std::vector<std::string> && artists,
                std::string && year);
-        series(series const &) = delete;
+        series(series const & s);
         series(series && s);
 
         series & operator=(series const &) = delete;
@@ -36,6 +44,9 @@ namespace mangaupdates
         std::vector<std::string> const & get_artists() const { return m_artists; }
         std::string const & get_year() const { return m_year; }
         std::string const & get_img_url() const { return m_img_url; }
+
+        void add_possible_matches(std::vector<match_type> && matches);
+        match_type const get_best_match() const;
     protected:
     private:
         size_t m_key;
@@ -49,6 +60,7 @@ namespace mangaupdates
         std::vector<std::string> m_authors;
         std::vector<std::string> m_artists;
         std::string m_year;
+        std::vector<match_type> m_matches;
     };
 };
 
