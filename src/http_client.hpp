@@ -100,11 +100,10 @@ namespace mangapp
         bool default_verify(bool preverified, boost::asio::ssl::verify_context & context);
     private:
         http_version m_version;
-
         std::atomic_bool m_is_running;
-        std::thread m_thread;
         uint8_t m_max_sockets;
         std::atomic<uint8_t> m_socket_count;
+        std::thread m_thread;
         std::mutex m_mutex_work;
         std::queue<std::function<void()>> m_pending_work;
 

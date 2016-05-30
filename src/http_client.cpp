@@ -10,11 +10,14 @@ namespace mangapp
 {
     http_client::http_client(http_version version, uint8_t max_sockets) :
         m_version(version),
-        m_max_sockets(m_max_sockets),
         m_is_running(true),
+        m_max_sockets(max_sockets),
+        m_socket_count(0),
         m_thread(),
-        m_io_service()/*,
-        m_infinite_work(new boost::asio::io_service::work(m_io_service))*/
+        m_mutex_work(),
+        m_pending_work(),
+        m_io_service(),
+        m_infinite_work(new boost::asio::io_service::work(m_io_service))
     {
         m_thread = std::thread([this]()
         {
