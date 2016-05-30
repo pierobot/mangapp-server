@@ -2,7 +2,6 @@
 #include "http_utility.hpp"
 
 #include <fstream>
-#include <iostream>
 
 #include <zlib.h>
 
@@ -19,6 +18,7 @@ namespace mangapp
         m_io_service(),
         m_infinite_work(new boost::asio::io_service::work(m_io_service))
     {
+        
         m_thread = std::thread([this]()
         {
             while (m_is_running == true)
@@ -35,7 +35,6 @@ namespace mangapp
                         {
                             auto work_function = m_pending_work.front();
                             m_pending_work.pop();
-
                             work_function();
                         }
                     }
@@ -201,32 +200,33 @@ namespace mangapp
         return inflated_buffer;
     }
 
-    void http_client::send(request_pointer request, ready_function on_ready, error_function on_error)
+    void http_client::do_connect_async(request_pointer && request, ready_function on_ready, error_function on_error)
     {
-        auto work_function = [this, request, on_ready, on_error]() -> void
+        boost::asio::ip::tcp::resolver resolver(m_io_service);
+        std::string port = request->get_protocol() == http_protocol::https ? "443" : "80";
+        boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), request->get_host(), port);
+        boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+        context_pointer context(new http_context());
+
+        context->on_error = on_error;
+        context->on_ready = on_ready;
+        context->request_ptr = request;
+
+        if (request->get_protocol() == http_protocol::https)
         {
-            boost::asio::ip::tcp::resolver resolver(m_io_service);
-            std::string port = request->get_protocol() == http_protocol::https ? "443" : "80";
-            boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), request->get_host(), port);
-            boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
-            socket_deleter deleter(m_socket_count);
-            context_pointer context(new http_context());
-
-            context->on_error = on_error;
-            context->on_ready = on_ready;
-            context->request_ptr = request;
-
-            if (request->get_protocol() == http_protocol::https)
+            // Yes, setup our SSL context
+            boost::asio::ssl::context ssl_context(boost::asio::ssl::context::sslv23_client);
+            //ssl_context.set_verify_mode(boost::asio::ssl::verify_peer);
+            //ssl_context.set_verify_callback([this](bool preverified, boost::asio::ssl::verify_context & context) -> bool
+            //{
+            //    return default_verify(preverified, context);
+            //});
+            // Create the SSL stream that will handle the protocol's messages and encryption/decryption
+            // 
+            ssl_socket_deleter ssl_deleter(m_socket_count);
+            socket_ssl_pointer ssl_socket(new boost::asio::ssl::stream<boost::asio::ip::tcp::socket>(m_io_service, ssl_context), ssl_deleter);
+            if (ssl_socket != nullptr)
             {
-                // Yes, setup our SSL context
-                boost::asio::ssl::context ssl_context(boost::asio::ssl::context::sslv23_client);
-                //ssl_context.set_verify_mode(boost::asio::ssl::verify_peer);
-                //ssl_context.set_verify_callback([this](bool preverified, boost::asio::ssl::verify_context & context) -> bool
-                //{
-                //    return default_verify(preverified, context);
-                //});
-                // Create the SSL stream that will handle the protocol's messages and encryption/decryption
-                socket_ssl_pointer ssl_socket(new boost::asio::ssl::stream<boost::asio::ip::tcp::socket>(m_io_service, ssl_context));
                 context->socket_ssl = std::move(ssl_socket);
 
                 boost::asio::async_connect(context->socket_ssl->lowest_layer(), iterator,
@@ -238,9 +238,13 @@ namespace mangapp
                         on_connect(context);
                 });
             }
-            else
+        }
+        else
+        {
+            socket_deleter deleter(m_socket_count);
+            socket_pointer socket(new boost::asio::ip::tcp::socket(m_io_service), deleter);
+            if (socket != nullptr)
             {
-                socket_pointer socket(new boost::asio::ip::tcp::socket(m_io_service), deleter);
                 context->socket = std::move(socket);
 
                 boost::asio::async_connect(*context->socket, iterator,
@@ -252,19 +256,22 @@ namespace mangapp
                         on_connect(context);
                 });
             }
-        };
+        }
+    }
 
-        // Are we under the socket limit?
+    void http_client::send(request_pointer && request, ready_function on_ready, error_function on_error)
+    {
         if (m_socket_count < m_max_sockets)
         {
-            // Yes, just do the work
-            work_function();
+            do_connect_async(std::move(request), on_ready, on_error);
         }
         else
         {
-            // Nope, we've exceeded the limit, so add it to the pending queue
             std::lock_guard<std::mutex> lock(m_mutex_work);
-            m_pending_work.emplace(work_function);
+            m_pending_work.push([this, request, on_ready, on_error]() mutable -> void
+            {
+                do_connect_async(std::move(request), on_ready, on_error);
+            });
         }
     }
 
@@ -448,7 +455,9 @@ namespace mangapp
                 context->response_ptr->set_body(std::move(contents));
                 // Forward the contents to the callback
                 if (context->on_ready != nullptr)
+                {
                     context->on_ready(std::move(context->response_ptr));
+                }
             }
         }
     }
