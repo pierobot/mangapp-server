@@ -27,7 +27,7 @@ namespace mangapp
         virtual ~manga_library();
     protected:
         void search_title(manga_directory & manga,
-                          std::function<void(std::string)> on_event,
+                          std::function<void(std::string const&)> on_event,
                           unsigned int start_page = 1,
                           unsigned int max_pages = 5);
         virtual void search_online_source(manga_directory & manga, std::function<void(mstch::map&&, bool)> on_event) final;

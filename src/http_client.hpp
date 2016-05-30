@@ -70,6 +70,29 @@ namespace mangapp
             if (p != nullptr)
             {
                 delete p;
+
+                --m_socket_count;
+            }
+        }
+    private:
+        std::atomic<uint8_t> & m_socket_count;
+    };
+
+    class ssl_socket_deleter
+    {
+    public:
+        ssl_socket_deleter(std::atomic<uint8_t> & socket_count) :
+            m_socket_count(socket_count)
+        {
+            ++m_socket_count;
+        }
+
+        void operator()(boost::asio::ssl::stream<boost::asio::ip::tcp::socket> * p)
+        {
+            if (p != nullptr)
+            {
+                delete p;
+
                 --m_socket_count;
             }
         }
@@ -95,7 +118,7 @@ namespace mangapp
         http_client(http_version version, uint8_t max_sockets = 8);
         ~http_client();
 
-        void send(request_pointer request, ready_function on_ready, error_function on_error);
+        void send(request_pointer && request, ready_function on_ready, error_function on_error);
     protected:
         bool default_verify(bool preverified, boost::asio::ssl::verify_context & context);
     private:
@@ -116,6 +139,8 @@ namespace mangapp
         std::string const get_body_from_stream(boost::asio::streambuf & streambuf, size_t bytes_read, size_t expected_size = 0) const;
         std::string & erase_chunk_length(std::string & contents) const;
         std::string const zlib_inflate(void const * deflated_buffer, unsigned int deflated_size) const;
+
+        void do_connect_async(request_pointer && request, ready_function on_ready, error_function on_error);
 
         void on_connect(context_pointer context);
         void on_handshake(context_pointer context);

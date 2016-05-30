@@ -69,7 +69,7 @@ namespace mangapp
         request_ptr->add_header("DNT", "1");
         request_ptr->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
 
-        m_http_client.send(request_ptr,
+        m_http_client.send(std::move(request_ptr),
             [on_error](http_client::response_pointer && response) -> void
         {
             if (response->get_code() == 200)
@@ -125,11 +125,11 @@ namespace mangapp
         request_title->add_header("DNT", "1");
         request_title->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
 
-        m_http_client.send(request_title, on_event, on_error);
+        m_http_client.send(std::move(request_title), on_event, on_error);
     }
 
     void manga_library::search_title(manga_directory & manga,
-                                     std::function<void(std::string)> on_event,
+                                     std::function<void(std::string const &)> on_event,
                                      unsigned int start_page,
                                      unsigned int max_pages)
     {
@@ -176,7 +176,7 @@ namespace mangapp
             on_event(mstch::map({}), false);
         };
 
-        auto on_id = [this, &manga, on_event, on_error](std::string id) -> void
+        auto on_id = [this, &manga, on_event, on_error](std::string const & id) -> void
         {
             if (id.empty() == true)
             {
