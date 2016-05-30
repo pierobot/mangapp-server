@@ -109,7 +109,7 @@ double jaroWinklerDistance(const std::string&a, const std::string& b)
     {
         // Calculate common string prefix.
         int commonPrefix(0);
-        for (int index(0), indexEnd(std::min(std::min(a.size(), b.size()), JARO_WINKLER_PREFIX_SIZE)); index < indexEnd; ++index)
+        for (int index(0), indexEnd(std::min<int>(std::min(a.size(), b.size()), JARO_WINKLER_PREFIX_SIZE)); index < indexEnd; ++index)
         {
             if (a.at(index) == b.at(index))
             {
