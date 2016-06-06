@@ -143,14 +143,8 @@ namespace mangapp
                     {
                         auto files_context(std::move(m_library.get_files_context(session_id, key)));
                         context.insert(files_context.begin(), files_context.end());
-
+                        
                         auto details_template(read_file_contents("../static/html/details-template.html"));
-
-                        auto const session_iterator = g_mangaupdates_cookies.find("secure_session");
-                        if (session_iterator != g_mangaupdates_cookies.cend())
-                            response.add_header("Set-Cookie", "secure_session=" + session_iterator->second + ";" +
-                                                              "domain=www.mangaupdates.com");
-
                         response.write(mstch::render(details_template, context));
                     }
                     else
