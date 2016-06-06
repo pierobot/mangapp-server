@@ -2,6 +2,7 @@
 #define MANGAPP_HTTP_CLIENT_HPP
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -43,6 +44,9 @@ namespace mangapp
         size_t bytes_transferred;
 
         std::string body;
+        
+        std::chrono::high_resolution_clock::time_point time_start;
+        std::chrono::high_resolution_clock::duration time_total;
 
         http_context() :
             request_ptr(nullptr), response_ptr(nullptr),
@@ -51,7 +55,9 @@ namespace mangapp
             on_error(nullptr), on_ready(nullptr),
             is_chunked(false),
             content_length(0), bytes_transferred(0),
-            body()
+            body(),
+            time_start(std::chrono::high_resolution_clock::now()),
+            time_total()
         {
         }
     };

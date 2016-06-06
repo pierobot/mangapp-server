@@ -452,6 +452,7 @@ namespace mangapp
                     contents = std::move(context->body);
                 }
 
+                context->time_total = std::chrono::high_resolution_clock::now() - context->time_start;
                 context->response_ptr->set_body(std::move(contents));
                 // Forward the contents to the callback
                 if (context->on_ready != nullptr)
