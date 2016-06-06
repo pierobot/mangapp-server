@@ -15,6 +15,7 @@ namespace mangapp
         virtual ~manga_directory();
 
         mangaupdates::series & get_series() { return m_series; }
+        void set_series(mangaupdates::series && series) { m_series = std::move(series); }
     protected:
     private:
         mangaupdates::series m_series;

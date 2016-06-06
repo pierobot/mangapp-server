@@ -19,6 +19,10 @@ namespace mangapp
         typedef manga_directory directory_type;
         typedef manga_entry file_entry_type;
 
+        typedef std::function<void(mstch::map&&, bool)> context_event;
+        typedef std::function<void(std::string const&)> string_event;
+        typedef std::function<void(http_client::response_pointer &&)> response_event;
+
         typedef base::library<directory_type>::key_type key_type;
 
         manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & usrs);
@@ -26,15 +30,18 @@ namespace mangapp
         manga_library(json11::Json const & library_paths, mangapp::users & usrs);
         virtual ~manga_library();
     protected:
-        void search_title(manga_directory & manga,
-                          std::function<void(std::string const&)> on_event,
-                          unsigned int start_page = 1,
-                          unsigned int max_pages = 5);
-        virtual void search_online_source(manga_directory & manga, std::function<void(mstch::map&&, bool)> on_event) final;
+        virtual void search_online_source(manga_directory & manga, context_event on_event) final;
     private:
         http_client m_http_client;
 
-        void request_page(std::string const & name, unsigned int page_index, std::function<void(http_client::response_pointer &&)> on_event);
+        mstch::map build_series_context(mangaupdates::series const & series) const;
+
+        void on_id(std::string const & id, manga_directory & manga, context_event on_event, string_event on_error);
+        void search_title(manga_directory & manga,
+                          string_event on_event,
+                          unsigned int start_page = 1,
+                          unsigned int max_pages = 5);
+        void request_page(std::string const & name, unsigned int page_index, response_event on_event);
         void get_mangaupdates_cookie();
     };
 }
