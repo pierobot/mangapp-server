@@ -141,6 +141,7 @@ namespace base
         {
             mstch::array library_array;
 
+            // Enumerate all the entries the user can access
             std::vector<std::reference_wrapper<directory_entry_type const>> ordered;
             for (auto const & pair : m_entries)
             {
@@ -149,6 +150,7 @@ namespace base
                     ordered.push_back(std::cref(pair.second));
             }
 
+            // Collate the entries
             std::sort(ordered.begin(), ordered.end(),
                 [](std::reference_wrapper<directory_entry_type const> const & left,
                    std::reference_wrapper<directory_entry_type const> const & right) -> bool
@@ -156,6 +158,7 @@ namespace base
                 return std::locale()(left.get().get_name(), right.get().get_name());
             });
 
+            // Construct the array of manga/comics
             for (auto const & entry : ordered)
             {
                 std::wstring utf16_name(entry.get().get_name());
@@ -177,10 +180,12 @@ namespace base
             auto const manga_comic_iterator = library::find(key);
             if (manga_comic_iterator != library::cend())
             {
+                // Firstly, ensure the user has access
                 size_t path_key = boost::hash<std::wstring>()(manga_comic_iterator->second.get_path());
                 if (m_users.can_access(session_id, path_key) == false)
                     return mstch::map();
 
+                // Enumerate all the files from the directory_entry
                 std::vector<std::reference_wrapper<library::file_entry_type const>> ordered;
 
                 std::for_each(manga_comic_iterator->second.cbegin(), manga_comic_iterator->second.cend(),
@@ -189,6 +194,7 @@ namespace base
                     ordered.push_back(std::cref(entry.second));
                 });
 
+                // Sort the filenames based on a regex rule
                 std::sort(ordered.begin(), ordered.end(),
                     [](std::reference_wrapper<library::file_entry_type const> const & left,
                        std::reference_wrapper<library::file_entry_type const> const & right)
@@ -197,12 +203,14 @@ namespace base
                 });
 
                 mstch::array files_array{};
-
+                
+                // Construct and populate the array of files
                 std::for_each(ordered.cbegin(), ordered.cend(),
                     [&files_array, key](std::reference_wrapper<library::file_entry_type const> const & value) -> void
                 {
                     auto const & entry = value.get();
 
+                    // Filter out any files that are not archives
                     if (is_archive_extension(entry.get_extension()) == true)
                     {
                         std::wstring const & utf16_name(entry.get_name());
@@ -235,24 +243,30 @@ namespace base
             auto const entry_iterator = find(key);
             if (entry_iterator != cend())
             {
+                // Ensure the user has access
                 size_t path_key = boost::hash<std::wstring>()(entry_iterator->second.get_path());
                 if (m_users.can_access(session_id, path_key) == false)
                     return mstch::map();
 
+                // Find the requested archive based from its key
                 auto archive_iterator = entry_iterator->second.find(file_key);
+                // Was it found?
                 if (archive_iterator != entry_iterator->second.cend())
                 {
+                    // Yes, get its path and open the archive
                     auto file_path = archive_iterator->second.get_path() + archive_iterator->second.get_name();
-
                     auto archive_ptr = mangapp::archive::open(file_path);
+                    // Ensure we have a valid pointer
                     if (archive_ptr != nullptr)
                     {
                         mstch::array image_array;
                         mstch::array image_dropdown;
                         uint32_t image_count = 0;
 
+                        // Populate the array of images
                         for (auto const & image_entry : *archive_ptr)
                         {
+                            // Filter out any files that are not images
                             if (is_image_extension(image_entry->extension()) == true)
                             {
                                 image_array.emplace_back(mstch::map({
@@ -310,7 +324,7 @@ namespace base
                 {
                     thumb_data = thumb_iterator_1->second.contents();
                 }
-                else if (thumb_iterator_2 != manga_comic_iterator->second.cend())
+                else if (thumb_iterator_2 != dir_entry.cend())
                 {
                     thumb_data = thumb_iterator_2->second.contents();
                 }
@@ -344,8 +358,8 @@ namespace base
         void get_details(key_type key, std::function<void(mstch::map&&, bool)> on_event)
         {
             // Is the key valid?
-            auto manga_comic_iterator = library::find(key);
-            if (manga_comic_iterator != library::end())
+            auto const manga_comic_iterator = library::find(key);
+            if (manga_comic_iterator != library::cend())
             {
                 // Yes, proceed
                 search_online_source(manga_comic_iterator->second, on_event);

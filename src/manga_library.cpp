@@ -97,7 +97,7 @@ namespace mangapp
 
     void manga_library::request_page(std::string const & name,
                                      unsigned int page_index,
-                                     std::function<void(http_client::response_pointer &&)> on_event)
+                                     response_event on_event)
     {
         auto on_error = [on_event](std::string const & error_msg)
         {
@@ -129,7 +129,7 @@ namespace mangapp
     }
 
     void manga_library::search_title(manga_directory & manga,
-                                     std::function<void(std::string const &)> on_event,
+                                     string_event on_event,
                                      unsigned int start_page,
                                      unsigned int max_pages)
     {
@@ -166,7 +166,102 @@ namespace mangapp
         });
     }
 
-    void manga_library::search_online_source(manga_directory & manga, std::function<void(mstch::map&&, bool)> on_event)
+    mstch::map manga_library::build_series_context(mangaupdates::series const & series) const
+    {
+        auto const & associated_names = series.get_associated_names();
+        auto const & description = series.get_description();
+        auto const & genres = series.get_genres();
+        auto const & authors = series.get_authors();
+        auto const & artists = series.get_artists();
+        auto const & year = series.get_year();
+        auto const & img_url = series.get_img_url();
+
+        mstch::array names_array;
+        for (auto const & name : associated_names)
+        {
+            names_array.emplace_back(mstch::map{
+                { "name", name }
+            });
+        }
+
+        mstch::array authors_array;
+        for (auto const & author : authors)
+        {
+            authors_array.emplace_back(mstch::map{
+                { "author", author }
+            });
+        }
+
+        mstch::array artists_array;
+        for (auto const & artist : artists)
+        {
+            artists_array.emplace_back(mstch::map{
+                { "artist", artist }
+            });
+        }
+
+        mstch::array genres_array;
+        for (auto const & genre : genres)
+        {
+            genres_array.emplace_back(mstch::map{
+                { "genre", genre }
+            });
+        }
+
+        return mstch::map({
+            { "names-list", names_array },
+            /*{ "description", description },*/
+            { "authors-list", authors_array },
+            { "artists-list", artists_array },
+            { "genres-list", genres_array },
+            { "year", year },
+            { "img-url", img_url } });
+    }
+
+    void manga_library::on_id(std::string const & id, manga_directory & manga, context_event on_event, string_event on_error)
+    {
+        if (id.empty() == true)
+        {
+            on_error(std::string(__func__) + " - Unable to find id for " + to_utf8(manga.get_name()));
+            return;
+        }
+
+        http_client::request_pointer request_id(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/series.html"));
+        if (request_id == nullptr)
+        {
+            on_error(std::string(__func__) + " - Unable to allocate http_client::request_pointer.");
+            return;
+        }
+
+        request_id->add_parameter("id", id);
+        request_id->add_header("Accept", "text/html");
+        request_id->add_header("Accept-Encoding", "gzip, deflate");
+        request_id->add_header("Connection", "close");
+        request_id->add_header("Host", "www.mangaupdates.com");
+        request_id->add_header("DNT", "1");
+        request_id->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
+
+        m_http_client.send(std::move(request_id),
+            [this, &manga, id, on_event, on_error](http_client::response_pointer && response)
+        {
+            if (response->get_code() != 200)
+            {
+                std::string message = std::string("Request to ") + response->get_header_value("Host") + " " + "failed: " + response->get_status();
+                on_error(message);
+                return;
+            }
+
+            auto const & contents = response->get_body();
+            mangaupdates::series series(contents, to_utf8(manga.get_name()), manga.get_key(), id);
+            
+            auto context = build_series_context(series);
+            manga.set_series(std::move(series));
+
+            on_event(std::move(context), true);
+        }, on_error);
+    }
+
+    void manga_library::search_online_source(manga_directory & manga, context_event on_event)
     {
         auto on_error = [on_event](std::string const & error_msg)
         {
@@ -176,98 +271,27 @@ namespace mangapp
             on_event(mstch::map({}), false);
         };
 
-        auto on_id = [this, &manga, on_event, on_error](std::string const & id) -> void
-        {
-            if (id.empty() == true)
-            {
-                on_error(std::string(__func__) + " - Unable to find id for " + to_utf8(manga.get_name()));
-                return;
-            }
-
-            http_client::request_pointer request_id(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/series.html"));
-            if (request_id == nullptr)
-            {
-                on_error(std::string(__func__) + " - Unable to allocate http_client::request_pointer.");
-                return;
-            }
-
-            request_id->add_parameter("id", id);
-            request_id->add_header("Accept", "text/html");
-            request_id->add_header("Accept-Encoding", "gzip, deflate");
-            request_id->add_header("Connection", "close");
-            request_id->add_header("Host", "www.mangaupdates.com");
-            request_id->add_header("DNT", "1");
-            request_id->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
-
-            m_http_client.send(std::move(request_id),
-                [this, &manga, id, on_event, on_error](http_client::response_pointer && response)
-            {
-                if (response->get_code() != 200)
-                {
-                    std::string message = std::string("Request to ") + response->get_header_value("Host") + " " + "failed: " + response->get_status();
-                    on_error(message);
-                }
-
-                auto const & contents = response->get_body();
-                mangaupdates::series series(contents, to_utf8(manga.get_name()), manga.get_key(), id);
-                auto const & associated_names = series.get_associated_names();
-                auto const & description = series.get_description();
-                auto const & genres = series.get_genres();
-                auto const & authors = series.get_authors();
-                auto const & artists = series.get_artists();
-                auto const & year = series.get_year();
-                auto const & img_url = series.get_img_url();
-
-                mstch::array names_array;
-                for (auto const & name : associated_names)
-                {
-                    names_array.emplace_back(mstch::map{
-                        { "name", name }
-                    });
-                }
-
-                mstch::array authors_array;
-                for (auto const & author : authors)
-                {
-                    authors_array.emplace_back(mstch::map{
-                        { "author", author }
-                    });
-                }
-
-                mstch::array artists_array;
-                for (auto const & artist : artists)
-                {
-                    artists_array.emplace_back(mstch::map{
-                        { "artist", artist }
-                    });
-                }
-
-                mstch::array genres_array;
-                for (auto const & genre : genres)
-                {
-                    genres_array.emplace_back(mstch::map{
-                        { "genre", genre }
-                    });
-                }
-
-                mstch::map context{
-                    { "names-list", names_array },
-                    /*{ "description", description },*/
-                    { "authors-list", authors_array },
-                    { "artists-list", artists_array },
-                    { "genres-list", genres_array },
-                    { "year", year },
-                    { "img-url", img_url }
-                };
-
-                on_event(std::move(context), true);
-            }, on_error);
-        };
-
+        // Find the manga in our library
         auto manga_iterator = library::find(manga.get_key());
         if (manga_iterator != library::end())
         {
-            search_title(manga_iterator->second, on_id);
+            // Do we have an existing id for the series?
+            auto const & id = manga.get_series().get_id();
+            if (id.empty() == false)
+            {
+                // Yes, we don't need to search for the series on mangaupdates
+                auto context = build_series_context(manga.get_series());
+                on_event(std::move(context), true);
+            }
+            else
+            {
+                // No, we must search for the series on mangaupdates
+                search_title(manga_iterator->second,
+                    [this, &manga, on_event, on_error](std::string const & id) -> void
+                {
+                    on_id(id, manga, on_event, on_error);
+                });
+            }
         }
     }
 }
