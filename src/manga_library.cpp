@@ -152,7 +152,7 @@ namespace mangapp
                 {
                     // No, keep the results and try again on the next page
                     manga.get_series().add_possible_matches(std::move(page_matches));
-                    if (++start_page <= max_pages)
+                    if (start_page != num_pages && ++start_page <= max_pages)
                         search_title(manga, on_event, start_page, max_pages);
                     else
                         on_event(manga.get_series().get_best_match().second);

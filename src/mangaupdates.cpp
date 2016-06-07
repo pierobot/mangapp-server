@@ -385,7 +385,8 @@ namespace mangaupdates
             }
         }
 
-        return 0;
+        // If 'page_search_str' is not found, then that means there was only one page worth of results
+        return 1;
     }
 
     auto get_page_matches(std::string const & contents, std::string const & name) -> std::vector<std::pair<float, std::string>>
