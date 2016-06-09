@@ -6,9 +6,9 @@ ENDIF()
 
 SET(PROJECT_NAME "mangapp-server")
 PROJECT(${PROJECT_NAME} C CXX)
-SET(${PROJECT_NAME}_MAJOR_VERSION 0)
-SET(${PROJECT_NAME}_MINOR_VERSION 1)
-SET(${PROJECT_NAME}_PATCH_VERSION 0)
+SET(MAJOR_VERSION 0)
+SET(MINOR_VERSION 1)
+SET(PATCH_VERSION 0)
 
 FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/archive_entry.cpp src/archive_entry.hpp
@@ -21,7 +21,7 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          
                          src/archive_zip.cpp src/archive_zip.hpp
                          src/archive_zip_entry.cpp src/archive_zip_entry.hpp
-						                         
+                                                 
                          src/directory_entry.hpp
                          src/directory_file_entry.cpp src/directory_file_entry.hpp
                          src/file_enumeration.hpp
@@ -43,7 +43,7 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/server.cpp src/server.hpp
                          src/sort.hpp
 
-						 src/string.hpp
+                         src/string.hpp
                          
                          src/users.cpp src/users.hpp
                          src/utf8.cpp src/utf8.hpp
@@ -75,7 +75,7 @@ FILE(GLOB JAROWINKLER_SOURCES thirdparty/Jaro-Winkler/jaroWinkler.cpp thirdparty
 ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES} 
                                ${JSON11_SOURCES}
                                ${SERVER_SOURCES}
-							   ${JAROWINKLER_SOURCES})
+                               ${JAROWINKLER_SOURCES})
 
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} thirdparty)
@@ -93,11 +93,12 @@ IF (MSVC)
     SET(Boost_USE_STATIC_LIBS ON)
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
-    ADD_DEFINITIONS(-DUSE_BOOST_REGEX)
+    ADD_DEFINITIONS(-D_UNIX)
     SET(Boost_USE_STATIC_LIBS OFF)
 ENDIF()
 
-ADD_DEFINITIONS(-DCROW_ENABLE_SSL)
+ADD_DEFINITIONS(-DCROW_ENABLE_SSL
+                -DUSE_BOOST_REGEX)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 

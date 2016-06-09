@@ -3,7 +3,10 @@
 
 #include "archive_entry.hpp"
 
-#include <unrar/rar.hpp>
+#ifdef _WIN32
+#   include <Windows.h>
+#endif
+
 #include <unrar/dll.hpp>
 
 namespace mangapp
