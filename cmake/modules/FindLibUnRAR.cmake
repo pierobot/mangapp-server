@@ -5,7 +5,7 @@
 # LIBUNRAR_INCLUDE_DIR, where to find the headers
 #
 
-FIND_PATH(LIBUNRAR_INCLUDE_DIR rar.hpp dll.hpp
+FIND_PATH(LIBUNRAR_INCLUDE_DIR dll.hpp
     $ENV{LIBUNRAR_DIR}
     ~/Library/Frameworks/unrar
     /Library/Frameworks/unrar
