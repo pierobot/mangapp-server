@@ -459,6 +459,8 @@ namespace mangaupdates
         m_artists(::get_artists(contents, m_current_pos)),
         m_year(::get_year(contents, m_current_pos))
     {
+        if (m_img_url.empty() == true)
+            m_img_url = std::string("/mangapp/thumbnail/") + std::to_string(m_key);
     }
 
     series::series(size_t key,
@@ -472,15 +474,17 @@ namespace mangaupdates
                    std::string && year) :
         m_key(key),
         m_current_pos(-1),
-        m_id(id),
-        m_description(description),
-        m_assoc_names(assoc_names),
-        m_img_url(img_url.empty() ? std::string("/mangapp/thumbnail/") + std::to_string(key) : img_url),
-        m_genres(genres),
-        m_authors(authors),
-        m_artists(artists),
-        m_year(year)
+        m_id(std::move(id)),
+        m_description(std::move(description)),
+        m_assoc_names(std::move(assoc_names)),
+        m_img_url(std::move(img_url)),
+        m_genres(std::move(genres)),
+        m_authors(std::move(authors)),
+        m_artists(std::move(artists)),
+        m_year(std::move(year))
     {
+        if (m_img_url.empty() == true)
+            m_img_url = std::string("/mangapp/thumbnail/") + std::to_string(key);
     }
 
     series::series(series const & s) :
