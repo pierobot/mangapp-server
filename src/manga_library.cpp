@@ -210,7 +210,7 @@ namespace mangapp
 
         return mstch::map({
             { "names-list", names_array },
-            /*{ "description", description },*/
+            { "description", description },
             { "authors-list", authors_array },
             { "artists-list", artists_array },
             { "genres-list", genres_array },
