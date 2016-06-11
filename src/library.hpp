@@ -404,6 +404,14 @@ namespace base
                             return remove;
                         });
 
+                        // Sort them
+                        std::sort(archive_ptr->begin(), archive_ptr->end(),
+                            [](mangapp::archive::entry_pointer const & left_ptr,
+                               mangapp::archive::entry_pointer const & right_ptr) -> int
+                        {
+                            return std::locale()(left_ptr->name(), right_ptr->name());
+                        });
+
                         // Get the contents of the image
                         if (archive_ptr->count() > 0)
                         {
