@@ -6,6 +6,8 @@
 
 #include <Jaro-Winkler/jaroWinkler.hpp>
 
+#include <json11/json11.hpp>
+
 namespace mangaupdates
 {
     unsigned int const get_num_pages(std::string const & contents);
@@ -21,11 +23,11 @@ namespace mangaupdates
         series(size_t key,
                std::string && id,
                std::string && description,
-               std::vector<std::string> && assoc_names,
+               std::string && assoc_names,
                std::string && img_url,
-               std::vector<std::string> && genres,
-               std::vector<std::string> && authors,
-               std::vector<std::string> && artists,
+               std::string && genres,
+               std::string && authors,
+               std::string && artists,
                std::string && year);
         series(series const & s);
         series(series && s);

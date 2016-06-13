@@ -1,6 +1,9 @@
 #ifndef MANGAPP_SERVER_H
 #define MANGAPP_SERVER_H
 
+#include "manga_library.hpp"
+#include "users.hpp"
+
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -14,20 +17,12 @@
 #include <crow/crow.h>
 #include <crow/middleware.h>
 
-namespace json11
-{
-    class Json;
-}
-
 namespace mangapp
 {
-    class manga_library;
-    class users;
-
     class server
     {
     public:
-        server(uint16_t port, json11::Json const & json_settings, users & usrs, manga_library & lib);
+        server(json11::Json const & settings_json);
 
         virtual ~server();
 
@@ -35,8 +30,8 @@ namespace mangapp
     protected:
     private:
         uint16_t m_port;
-        users & m_users;
-        manga_library & m_library;
+        users m_users;
+        manga_library m_manga_library;
         crow::Crow<crow::CookieParser> m_app;
         json11::Json const & m_tls_ssl;
     };

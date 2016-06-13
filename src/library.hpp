@@ -15,6 +15,9 @@
 
 #include <mstch/mstch.hpp>
 
+#include <sqlite3pp/headeronly_src/sqlite3pp.h>
+
+
 namespace base
 {
     namespace
@@ -62,14 +65,17 @@ namespace base
         typedef typename library_map_type::iterator iterator;
         typedef typename library_map_type::const_iterator const_iterator;
 
+        typedef std::function<void(sqlite3pp::query::iterator, sqlite3pp::query::iterator)> on_query_function;
+
         /**
         *  Constructor for the library. Multiple paths can be parsed.
         *
         *  @param library_paths a vector containing the file path(s)
         */
-        library(std::vector<std::wstring> const & library_paths, mangapp::users & users) :
+        library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file) :
             m_entries(),
-            m_users(users)
+            m_users(users),
+            m_database_file(database_file)
         {
             // Iterate through the libraries
             for (auto const & library_path : library_paths)
@@ -88,13 +94,13 @@ namespace base
             }
         }
 
-        library(std::vector<std::string> const & library_paths, mangapp::users & users) :
-            library(utf8_paths_to_utf16(library_paths), users)
+        library(std::vector<std::string> const & library_paths, mangapp::users & users, std::string const & database_file) :
+            library(utf8_paths_to_utf16(library_paths), users, database_file)
         {
         }
 
-        library(json11::Json const & library_paths, mangapp::users & users) :
-            library(json_to_utf16_vector(library_paths), users)
+        library(json11::Json const & settings_json, mangapp::users & users, std::string const & database_file) :
+            library(json_to_utf16_vector(settings_json["manga"]), users, database_file)
         {
         }
 
@@ -430,9 +436,38 @@ namespace base
         virtual void search_online_source(directory_entry_type & entry, std::function<void(mstch::map&&, bool)> on_event)
         {
         }
+
+        void sqlite3_execute(std::string const & command_str, std::map<std::string, std::string> params)
+        {
+            sqlite3pp::database database(m_database_file.c_str());
+            sqlite3pp::command cmd(database, command_str.c_str());
+            
+            for (auto const & kv : params)
+            {
+                cmd.bind(kv.first.c_str(), kv.second.c_str(), sqlite3pp::nocopy);
+            }
+
+            cmd.execute();
+        }
+
+        void sqlite3_query(std::string const & query_str,
+                           std::map<std::string, std::string> params,
+                           on_query_function on_query) const
+        {
+            sqlite3pp::database database(m_database_file.c_str());
+            sqlite3pp::query query(database, query_str.c_str());
+            
+            for (auto const & kv : params)
+            {
+                query.bind(kv.first.c_str(), kv.second.c_str(), sqlite3pp::nocopy);
+            }
+
+            on_query(query.begin(), query.end());
+        }
     private:
         library_map_type m_entries;
         mangapp::users & m_users;
+        std::string m_database_file;
     };
 }
 

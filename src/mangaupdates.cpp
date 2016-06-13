@@ -365,6 +365,20 @@ namespace
 
         return img_url;
     }
+
+    std::vector<std::string> const get_json_array(std::string && json_str)
+    {
+        std::vector<std::string> array;
+
+        std::string error;
+        json11::Json json = json11::Json::parse(json_str, error);
+        for (auto const & element : json.array_items())
+        {
+            array.push_back(element.string_value());
+        }
+
+        return array;
+    }
 }
 
 namespace mangaupdates
@@ -466,21 +480,21 @@ namespace mangaupdates
     series::series(size_t key,
                    std::string && id,
                    std::string && description,
-                   std::vector<std::string> && assoc_names,
+                   std::string && assoc_names,
                    std::string && img_url,
-                   std::vector<std::string> && genres,
-                   std::vector<std::string> && authors,
-                   std::vector<std::string> && artists,
+                   std::string && genres,
+                   std::string && authors,
+                   std::string && artists,
                    std::string && year) :
         m_key(key),
         m_current_pos(-1),
         m_id(std::move(id)),
         m_description(std::move(description)),
-        m_assoc_names(std::move(assoc_names)),
+        m_assoc_names(get_json_array(std::move(assoc_names))),
         m_img_url(std::move(img_url)),
-        m_genres(std::move(genres)),
-        m_authors(std::move(authors)),
-        m_artists(std::move(artists)),
+        m_genres(get_json_array(std::move(genres))),
+        m_authors(get_json_array(std::move(authors))),
+        m_artists(get_json_array(std::move(artists))),
         m_year(std::move(year))
     {
         if (m_img_url.empty() == true)
