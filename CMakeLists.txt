@@ -71,14 +71,18 @@ FILE(GLOB 7Z_SOURCES thirdparty/7z/7zAlloc.c
                      thirdparty/7z/Ppmd7.c
                      thirdparty/7z/Ppmd7Dec.c)
 FILE(GLOB JAROWINKLER_SOURCES thirdparty/Jaro-Winkler/jaroWinkler.cpp thirdparty/Jaro-Winkler/jaroWinkler.hpp)
+FILE(GLOB SQLITE3_SOURCES thirdparty/sqlite/sqlite3.c thirdparty/sqlite/sqlite3.h)
+FILE(GLOB SQLITE3PP_SOURCES thirdparty/sqlite3pp/headeronly_src/sqlite3pp.ipp thirdparty/sqlite3pp/headeronly_src/sqlite3pp.h)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${7Z_SOURCES} 
                                ${JSON11_SOURCES}
                                ${SERVER_SOURCES}
-                               ${JAROWINKLER_SOURCES})
+                               ${JAROWINKLER_SOURCES}
+                               ${SQLITE3_SOURCES}
+                               ${SQLITE3PP_SOURCES})
 
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} thirdparty)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} thirdparty thirdparty/sqlite)
 
 IF (MSVC)
     SET(CMAKE_USE_WIN32_THREADS_INIT true)

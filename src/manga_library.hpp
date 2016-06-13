@@ -25,9 +25,9 @@ namespace mangapp
 
         typedef base::library<directory_type>::key_type key_type;
 
-        manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & usrs);
-        manga_library(std::vector<std::string> const & library_paths, mangapp::users & usrs);
-        manga_library(json11::Json const & library_paths, mangapp::users & usrs);
+        manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file);
+        manga_library(std::vector<std::string> const & library_paths, mangapp::users & users, std::string const & database_file);
+        manga_library(json11::Json const & settings_json, mangapp::users & users, std::string const & database_file);
         virtual ~manga_library();
     protected:
         virtual void search_online_source(manga_directory & manga, context_event on_event) final;
@@ -43,6 +43,11 @@ namespace mangapp
                           unsigned int max_pages = 5);
         void request_page(std::string const & name, unsigned int page_index, response_event on_event);
         void get_mangaupdates_cookie();
+
+        void save_cover(key_type key, std::string const & id, std::string const & image);
+        void save_details(key_type key, mangaupdates::series const & series);
+
+        auto query_details(key_type key) const -> mangaupdates::series;
     };
 }
 
