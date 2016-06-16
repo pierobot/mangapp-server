@@ -34,10 +34,10 @@ namespace
 
 namespace mangapp
 {
-    users::users(json11::Json const & users_json, json11::Json const & manga_json) :
+    users::users(json11::Json const & settings_json) :
         m_users_mutex()
     {
-        for (auto const & users : users_json.array_items())
+        for (auto const & users : settings_json["users"].array_items())
         {
             json11::Json const & object = users.object_items();
             auto const & name = object["name"].string_value();
@@ -47,7 +47,7 @@ namespace mangapp
             m_users.emplace(name, data);
         }
 
-        for (auto const & paths : manga_json.array_items())
+        for (auto const & paths : settings_json["manga"].array_items())
         {
             json11::Json const & object = paths.object_items();
             auto const path = to_utf16(object["path"].string_value());
