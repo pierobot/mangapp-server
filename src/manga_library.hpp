@@ -42,7 +42,6 @@ namespace mangapp
                           unsigned int start_page = 1,
                           unsigned int max_pages = 5);
         void request_page(std::string const & name, unsigned int page_index, response_event on_event);
-        void get_mangaupdates_cookie();
 
         void save_cover(key_type key, std::string const & id, std::string const & image);
         void save_details(key_type key, mangaupdates::series const & series);

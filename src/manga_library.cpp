@@ -17,120 +17,28 @@
 extern std::mutex g_mutex_cout;
 
 namespace mangapp
-{
-    std::unordered_map<std::string, std::string> g_mangaupdates_cookies;
-    
+{  
     manga_library::manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file) :
         library<manga_directory>(library_paths, users, database_file),
         m_http_client(http_version::v1_1)
     {
-        if (g_mangaupdates_cookies.size() == 0)
-            get_mangaupdates_cookie();
     }
 
     manga_library::manga_library(std::vector<std::string> const & library_paths, mangapp::users & users, std::string const & database_file) :
         library<manga_directory>(library_paths, users, database_file),
         m_http_client(http_version::v1_1)
     {
-        if (g_mangaupdates_cookies.size() == 0)
-            get_mangaupdates_cookie();
     }
 
     manga_library::manga_library(json11::Json const & settings_json, mangapp::users & users, std::string const & database_file) :
         library<manga_directory>(settings_json, users, database_file),
         m_http_client(http_version::v1_1)
     {
-        if (g_mangaupdates_cookies.size() == 0)
-            get_mangaupdates_cookie();
-
-        auto on_error = [](std::string const & error_msg)
-        {
-            std::lock_guard<std::mutex> lock(g_mutex_cout);
-            std::cout << error_msg << std::endl;
-        };
-
-        http_client::request_pointer request_ptr(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/image/i189392.png"));
-        if (request_ptr == nullptr)
-        {
-            on_error(std::string(__func__) + " - Unable to allocate http_client::request_pointer.");
-            return;
-        }
-
-        //request_ptr->add_header("Accept", "text/html");
-        request_ptr->add_header("Accept-Encoding", "gzip, deflate");
-        request_ptr->add_header("Connection", "close");
-        request_ptr->add_header("Host", "www.mangaupdates.com");
-        request_ptr->add_header("DNT", "1");
-        request_ptr->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
-
-        request_ptr->add_header("Cookie", "secure_session=" + g_mangaupdates_cookies["secure_session"]);
-
-        m_http_client.send(std::move(request_ptr),
-            [on_error](http_client::response_pointer && response) -> void
-        {
-            if (response->get_code() == 200)
-            {
-                {
-                    auto const & str = response->get_body();
-                    std::ofstream f("b.jpeg", std::ios::binary);
-
-                    f.write(str.c_str(), str.size());
-                }
-            }
-        }, on_error);
     }
 
     manga_library::~manga_library()
     {
     }  
-
-    void manga_library::get_mangaupdates_cookie()
-    {
-        auto on_error = [](std::string const & error_msg)
-        {
-            std::lock_guard<std::mutex> lock(g_mutex_cout);
-            std::cout << error_msg << std::endl;
-        };
-
-        http_client::request_pointer request_ptr(new http_request(http_protocol::https, http_action::get, "www.mangaupdates.com", "/"));
-        if (request_ptr == nullptr)
-        {
-            on_error(std::string(__func__) + " - Unable to allocate http_client::request_pointer.");
-            return;
-        }
-
-        request_ptr->add_header("Accept", "text/html");
-        request_ptr->add_header("Accept-Encoding", "gzip, deflate");
-        request_ptr->add_header("Connection", "close");
-        request_ptr->add_header("Host", "www.mangaupdates.com");
-        request_ptr->add_header("DNT", "1");
-        request_ptr->add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36");
-
-        m_http_client.send(std::move(request_ptr),
-            [on_error](http_client::response_pointer && response) -> void
-        {
-            if (response->get_code() == 200)
-            {
-                for (auto const & cookies : response->get_cookies())
-                {
-                    auto const session_iterator = cookies.find("secure_session");
-                    if (session_iterator != cookies.cend())
-                    {
-                        g_mangaupdates_cookies.emplace(session_iterator->first, session_iterator->second);
-                    }
-                }
-
-                if (g_mangaupdates_cookies.size() == 0)
-                    on_error(std::string(__func__) + " - Unable to find secure_session cookie.");
-            }
-            else
-            {
-                std::string message = std::string(__func__) + " - Request to " + response->get_header_value("Host") + " " + "failed: " + response->get_status();
-                on_error(message);
-            }
-
-        }, on_error);
-    }
 
     void manga_library::request_page(std::string const & name,
                                      unsigned int page_index,
@@ -175,7 +83,7 @@ namespace mangapp
             [this, &manga, name, on_event, start_page, max_pages](http_client::response_pointer && response_ptr) mutable -> void
         {
             std::string const & contents = response_ptr->get_body();
-            unsigned int num_pages = mangaupdates::get_num_pages(contents);           
+            unsigned int num_pages = mangaupdates::get_num_pages(contents);
             auto page_matches = mangaupdates::get_page_matches(contents, name);
             if (page_matches.size() > 0)
             {
@@ -332,7 +240,7 @@ namespace mangapp
         }
     }
 
-    void manga_library::save_cover(size_t key, std::string const & id, std::string const & image)
+    void manga_library::save_cover(key_type key, std::string const & id, std::string const & image)
     {
         static std::string save_command = "INSERT INTO images (key, id, image) VALUES (@key, @id, @image)";
         library::sqlite3_execute(save_command, { { "key", std::to_string(key) }, { "@id", id }, { "@image", image } });
