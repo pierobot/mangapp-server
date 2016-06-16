@@ -24,7 +24,7 @@ namespace mangapp
     class users
     {
     public:
-        users(json11::Json const & users_json, json11::Json const & manga_json);
+        users(json11::Json const & settings_json);
         ~users();
 
         bool authenticate(std::string const & user, std::string const & password, std::string & session_id);
