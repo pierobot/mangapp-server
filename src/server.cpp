@@ -11,7 +11,7 @@ namespace
 {
     static std::string const session_cookie_str = "session_id";
 
-    std::string read_file_contents(std::string const & path)
+    std::string const read_file_contents(std::string const & path)
     {
         std::string contents;
         std::ifstream file_stream(path, std::ios::binary);
@@ -23,21 +23,26 @@ namespace
 
         return contents;
     }
+
+    std::string const get_database_path(std::string const & library_name, json11::Json const & database_json)
+    {
+        return database_json[library_name].string_value();
+    }
 }
 
 namespace mangapp
 {
     extern std::unordered_map<std::string, std::string> g_mangaupdates_cookies;
 
-    server::server(uint16_t port, json11::Json const & json_settings, users & usrs, manga_library & library) :
-        m_port(port),
-        m_users(usrs),
-        m_library(library),
+    server::server(json11::Json const & settings_json) :
+        m_port(settings_json["port"].int_value()),
+        m_users(settings_json),
+        m_manga_library(settings_json, m_users, get_database_path("manga", settings_json["database"])),
         m_app(),
-        m_tls_ssl(json_settings["tls/ssl"])
+        m_tls_ssl(settings_json["tls/ssl"])
     {
         crow::logger::setLogLevel(crow::LogLevel::CRITICAL);
-
+        
         // Main route
         CROW_ROUTE(m_app, "/mangapp").methods(crow::HTTPMethod::GET)
             ([this](crow::request const & request) -> crow::response
@@ -54,7 +59,7 @@ namespace mangapp
                 // We're authenticated, so we can send index.html
                 auto index_template(read_file_contents("../static/html/index-template.html"));
 
-                mstch::map context(m_library.get_list_context(session_id));
+                mstch::map context(m_manga_library.get_list_context(session_id));
 
                 return crow::response(mstch::render(index_template, context));
             }
@@ -113,7 +118,7 @@ namespace mangapp
             if (m_users.is_authenticated(session_id) == false)
                 return crow::response(401);
 
-            auto thumbnail_data(m_library.get_thumbnail(session_id, key));
+            auto thumbnail_data(m_manga_library.get_thumbnail(session_id, key));
             if (thumbnail_data.empty() == true)
             {
                 return crow::response(read_file_contents("../static/img/unknown.jpg"));
@@ -134,14 +139,14 @@ namespace mangapp
                 return;
             }
 
-            m_library.get_details(key,
+            m_manga_library.get_details(key,
                 [this, &response, session_id, key](mstch::map && context, bool success) -> void
             {
                 if (response.is_alive() == true)
                 {
                     if (success == true)
                     {
-                        auto files_context(std::move(m_library.get_files_context(session_id, key)));
+                        auto files_context(std::move(m_manga_library.get_files_context(session_id, key)));
                         context.insert(files_context.begin(), files_context.end());
                         
                         auto details_template(read_file_contents("../static/html/details-template.html"));
@@ -166,7 +171,7 @@ namespace mangapp
                 return crow::response(401);
 
             auto reader_template(read_file_contents("../static/html/reader-template.html"));
-            auto context(m_library.get_reader_context(session_id, manga_key, file_key));
+            auto context(m_manga_library.get_reader_context(session_id, manga_key, file_key));
 
             return crow::response(mstch::render(reader_template, context));
         });
@@ -179,7 +184,7 @@ namespace mangapp
             if (m_users.is_authenticated(session_id) == false)
                 return crow::response(401);
 
-            auto const image_contents = m_library.get_image(session_id, manga_key, file_key, index);
+            auto const image_contents = m_manga_library.get_image(session_id, manga_key, file_key, index);
             if (image_contents.empty() == false)
             {
                 auto response = crow::response(image_contents);
