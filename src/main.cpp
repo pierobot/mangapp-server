@@ -65,12 +65,7 @@ int main(int argc, char **argv)
         if (settings_json != nullptr)
         {
             mangapp::server server(settings_json);
-            std::thread server_thread([&server]()
-            {
-                server.start();
-            });
-
-            server_thread.join();
+            server.start();
         }
         else
             std::cout << "Unable to parse settings. Reason: " << error_str << std::endl;
