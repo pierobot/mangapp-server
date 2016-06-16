@@ -17,7 +17,7 @@
 extern std::mutex g_mutex_cout;
 
 namespace mangapp
-{  
+{
     manga_library::manga_library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file) :
         library<manga_directory>(library_paths, users, database_file),
         m_http_client(http_version::v1_1)
@@ -34,11 +34,27 @@ namespace mangapp
         library<manga_directory>(settings_json, users, database_file),
         m_http_client(http_version::v1_1)
     {
+        sqlite3pp::database mangadb(database_file.c_str());
+        sqlite3pp::command details_cmd(mangadb, "CREATE TABLE IF NOT EXISTS details (key TEXT NOT NULL,"
+                                                                                    "id TEXT NOT NULL,"
+                                                                                    "artists TEXT NOT NULL,"
+                                                                                    "authors TEXT NOT NULL,"
+                                                                                    "description TEXT NOT NULL,"
+                                                                                    "genres TEXT NOT NULL,"
+                                                                                    "names TEXT NOT NULL,"
+                                                                                    "year TEXT NOT NULL);");
+
+        sqlite3pp::command images_cmd(mangadb, "CREATE TABLE IF NOT EXISTS images (key TEXT NOT NULL,"
+                                                                                  "id TEXT NOT NULL,"
+                                                                                  "image BLOB NOT NULL);");
+
+        details_cmd.execute();
+        images_cmd.execute();
     }
 
     manga_library::~manga_library()
     {
-    }  
+    }
 
     void manga_library::request_page(std::string const & name,
                                      unsigned int page_index,
@@ -272,9 +288,9 @@ namespace mangapp
     auto manga_library::query_details(key_type key) const -> mangaupdates::series
     {
         static std::string query_str = "SELECT * FROM details WHERE key = @key";
-        
+
         mangaupdates::series series;
-        
+
         library::sqlite3_query(query_str.c_str(), { { "@key", std::to_string(key) } },
             [key, &series](sqlite3pp::query::iterator begin, sqlite3pp::query::iterator end)
         {
@@ -289,12 +305,12 @@ namespace mangapp
                 std::string year;
 
                 (*begin).getter() >> sqlite3pp::ignore >> id >> artists_str >> authors_str >> description >> genres_str >> names_str >> year;
-               
-                series = std::move(mangaupdates::series(key, std::move(id), std::move(description), 
+
+                series = std::move(mangaupdates::series(key, std::move(id), std::move(description),
                                                         std::move(names_str), std::string(), std::move(genres_str),
                                                         std::move(authors_str), std::move(artists_str), std::move(year)));
             }
-            
+
         });
 
         return series;
