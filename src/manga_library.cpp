@@ -112,11 +112,11 @@ namespace mangapp
                 else
                 {
                     // No, keep the results and try again on the next page
-                    manga.get_series().add_possible_matches(std::move(page_matches));
+                    manga.add_possible_matches(std::move(page_matches));
                     if (start_page != num_pages && ++start_page <= max_pages)
                         search_title(manga, on_event, start_page, max_pages);
                     else
-                        on_event(manga.get_series().get_best_match().second);
+                        on_event(manga.get_best_match().second);
                 }
             }
             else
@@ -184,6 +184,9 @@ namespace mangapp
         if (id.empty() == true)
         {
             on_error(std::string(__func__) + " - Unable to find id for " + to_utf8(manga.get_name()));
+            // Just pass an empty context
+            on_event(mstch::map(), true);
+
             return;
         }
 
@@ -225,12 +228,16 @@ namespace mangapp
 
     void manga_library::search_online_source(manga_directory & manga, context_event on_event)
     {
-        auto on_error = [on_event](std::string const & error_msg)
+        auto on_error = [this, &manga, on_event](std::string const & error_msg)
         {
-            std::lock_guard<std::mutex> lock(g_mutex_cout);
-            std::cout << error_msg << std::endl;
+            {
+                std::lock_guard<std::mutex> lock(g_mutex_cout);
+                std::cout << error_msg << std::endl;
+            }
 
-            on_event(mstch::map({}), false);
+            // Generate an empty series class and context
+            mangaupdates::series series(manga.get_key());
+            on_event(std::move(build_series_context(series)), true);
         };
 
         // Find the manga in our library
@@ -241,8 +248,7 @@ namespace mangapp
             mangaupdates::series series = query_details(manga.get_key());
             if (series.get_id().empty() == false)
             {
-                auto context = build_series_context(series);
-                on_event(std::move(context), true);
+                on_event(std::move(build_series_context(series)), true);
             }
             else
             {
@@ -289,7 +295,7 @@ namespace mangapp
     {
         static std::string query_str = "SELECT * FROM details WHERE key = @key";
 
-        mangaupdates::series series;
+        mangaupdates::series series(key);
 
         library::sqlite3_query(query_str.c_str(), { { "@key", std::to_string(key) } },
             [key, &series](sqlite3pp::query::iterator begin, sqlite3pp::query::iterator end)

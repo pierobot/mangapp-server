@@ -10,15 +10,17 @@ namespace mangapp
     class manga_directory : public base::directory_entry<manga_entry>
     {
     public:
+        typedef std::pair<float, std::string> match_type;
+
         manga_directory(std::wstring const & path, std::wstring const & name, size_t key);
         
         virtual ~manga_directory();
 
-        mangaupdates::series & get_series() { return m_series; }
-        void set_series(mangaupdates::series && series) { m_series = std::move(series); }
+        void add_possible_matches(std::vector<match_type> && matches);
+        match_type const get_best_match() const;
     protected:
     private:
-        mangaupdates::series m_series;
+        std::vector<match_type> m_matches;
     };
 }
 

@@ -29,3 +29,6 @@
 
 # Build folder for CMake
 build
+
+# Local dev database
+*.sqlite3
