@@ -457,7 +457,17 @@ namespace mangaupdates
         return matches;
     }
 
-    series::series()
+    series::series(size_t key) :
+        m_key(key),
+        m_current_pos(-1),
+        m_id(),
+        m_description("N/A"),
+        m_assoc_names({ "N/A" }),
+        m_img_url(std::string("/mangapp/thumbnail/") + std::to_string(m_key)),
+        m_genres({ "N/A" }),
+        m_authors({"N/A"}),
+        m_artists({"N/A"}),
+        m_year({"N/A"})
     {
     }
 
@@ -547,20 +557,5 @@ namespace mangaupdates
 
     series::~series()
     {
-    }
-
-    void series::add_possible_matches(std::vector<match_type> && matches)
-    {
-        std::copy(matches.begin(), matches.end(), std::back_inserter(m_matches));
-    }
-    
-    series::match_type const series::get_best_match() const
-    {
-        match_type best_match;
-
-        if (m_matches.size() > 0)
-            best_match = m_matches.front();
-
-        return best_match;
     }
 }

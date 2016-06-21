@@ -16,9 +16,9 @@ namespace mangaupdates
     class series
     {
     public:
-        typedef std::pair<float, std::string> match_type;
 
-        series();
+
+        series(size_t key);
         series(std::string const & contents, std::string const & name, size_t key, std::string const & id = "");
         series(size_t key,
                std::string && id,
@@ -46,9 +46,6 @@ namespace mangaupdates
         std::vector<std::string> const & get_artists() const { return m_artists; }
         std::string const & get_year() const { return m_year; }
         std::string const & get_img_url() const { return m_img_url; }
-
-        void add_possible_matches(std::vector<match_type> && matches);
-        match_type const get_best_match() const;
     protected:
     private:
         size_t m_key;
@@ -62,7 +59,6 @@ namespace mangaupdates
         std::vector<std::string> m_authors;
         std::vector<std::string> m_artists;
         std::string m_year;
-        std::vector<match_type> m_matches;
     };
 };
 
