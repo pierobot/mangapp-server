@@ -12,7 +12,13 @@
 
 #include <boost/algorithm/string.hpp>
 
-std::mutex g_mutex_cout;
+void console_write_line(std::string const & function_name, std::string const & message)
+{
+    static std::mutex mutex_cout;
+    std::lock_guard<std::mutex> lock(mutex_cout);
+
+    std::cout << function_name << " - " << message << std::endl;
+}
 
 static bool verify_arguments(boost::program_options::variables_map const & args,
                              boost::program_options::options_description const & options)
