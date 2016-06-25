@@ -14,7 +14,7 @@
 
 #include <mstch/mstch.hpp>
 
-extern std::mutex g_mutex_cout;
+extern void console_write_line(std::string const & function_name, std::string const & message);
 
 namespace mangapp
 {
@@ -62,8 +62,7 @@ namespace mangapp
     {
         auto on_error = [on_event](std::string const & error_msg)
         {
-            std::lock_guard<std::mutex> lock(g_mutex_cout);
-            std::cout << error_msg << std::endl;
+            console_write_line("manga_library::request_page", error_msg);
 
             on_event(nullptr);
         };
@@ -230,11 +229,7 @@ namespace mangapp
     {
         auto on_error = [this, &manga, on_event](std::string const & error_msg)
         {
-            {
-                std::lock_guard<std::mutex> lock(g_mutex_cout);
-                std::cout << error_msg << std::endl;
-            }
-
+            console_write_line("manga_library::search_online_source", error_msg);
             // Generate an empty series class and context
             mangaupdates::series series(manga.get_key());
             on_event(std::move(build_series_context(series)), true);
