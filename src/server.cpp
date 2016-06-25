@@ -48,7 +48,7 @@ namespace mangapp
             ([this](crow::request const & request) -> crow::response
         {
             auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
-
+            
             if (m_users.is_authenticated(session_id) == false)
             {
                 // Not authenticated yet, so send the login page
@@ -117,6 +117,8 @@ namespace mangapp
             auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (m_users.is_authenticated(session_id) == false)
                 return crow::response(401);
+            
+            m_app.get_context<middleware::deflate>(request).compress = false;
 
             auto thumbnail_data(m_manga_library.get_thumbnail(session_id, key));
             if (thumbnail_data.empty() == true)
@@ -183,6 +185,8 @@ namespace mangapp
             auto const & session_id = m_app.get_context<crow::CookieParser>(request).get_cookie(session_cookie_str);
             if (m_users.is_authenticated(session_id) == false)
                 return crow::response(401);
+
+            m_app.get_context<middleware::deflate>(request).compress = false;
 
             auto const image_contents = m_manga_library.get_image(session_id, manga_key, file_key, index);
             if (image_contents.empty() == false)

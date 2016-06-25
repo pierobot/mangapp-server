@@ -34,6 +34,8 @@ FILE(GLOB SERVER_SOURCES src/archive.cpp src/archive.hpp
                          src/library.hpp
                          src/main.cpp
 
+                         src/middleware_deflate.hpp
+
                          src/manga_directory_entry.cpp src/manga_directory_entry.hpp
                          src/manga_entry.cpp src/manga_entry.hpp
                          src/manga_library.cpp src/manga_library.hpp
