@@ -1,13 +1,6 @@
 #ifndef MANGAPP_SERVER_H
 #define MANGAPP_SERVER_H
 
-#include "manga_library.hpp"
-#include "users.hpp"
-
-#include <cstdint>
-#include <string>
-#include <vector>
-
 #ifdef _WIN32
 // Windows headers define the following and will cause compile errors if not undef'd
 #   undef ERROR
@@ -16,6 +9,10 @@
 
 #include <crow/crow.h>
 #include <crow/middleware.h>
+
+#include "manga_library.hpp"
+#include "users.hpp"
+#include "middleware_deflate.hpp"
 
 namespace mangapp
 {
@@ -32,7 +29,7 @@ namespace mangapp
         uint16_t m_port;
         users m_users;
         manga_library m_manga_library;
-        crow::Crow<crow::CookieParser> m_app;
+        crow::Crow<crow::CookieParser, middleware::deflate> m_app;
         json11::Json const & m_tls_ssl;
     };
 }
