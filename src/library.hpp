@@ -8,6 +8,7 @@
 #include "users.hpp"
 #include "utf8.hpp"
 #include "image.hpp"
+#include "watcher.hpp"
 
 #include <unordered_map>
 
@@ -75,7 +76,9 @@ namespace base
         library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file) :
             m_entries(),
             m_users(users),
-            m_database_file(database_file)
+            m_database_file(database_file),
+            m_watcher_ptr(mangapp::watcher::create([this](std::wstring const & path, std::wstring const & name, bool remove) { on_path_change(path, name, remove); },
+                                                   [this](std::wstring const & path, std::wstring const & name, bool remove) { on_file_change(path, name, remove); }))
         {
             // Iterate through the libraries
             for (auto const & library_path : library_paths)
@@ -89,9 +92,17 @@ namespace base
                     std::wstring path_str(path, 0, path_end_pos + 1);
 
                     auto key = boost::hash<std::wstring>()(name_str);
-                    m_entries.emplace(key, directory_entry_type(path_str, name_str, key));
+                    auto kv = m_entries.emplace(key, directory_entry_type(path_str, name_str, key));
+
+                    // Watch for changes in the manga directory
+                    m_watcher_ptr->add_path(path + L"/");
                 });
+
+                // Watch for any new manga directories
+                m_watcher_ptr->add_path(library_path);
             }
+
+            m_watcher_ptr->start();
         }
 
         library(std::vector<std::string> const & library_paths, mangapp::users & users, std::string const & database_file) :
@@ -432,6 +443,7 @@ namespace base
 
             return image_contents;
         }
+
     protected:
         virtual void search_online_source(directory_entry_type & entry, std::function<void(mstch::map&&, bool)> on_event)
         {
@@ -464,10 +476,20 @@ namespace base
 
             on_query(query.begin(), query.end());
         }
+
+        void on_path_change(std::wstring const & path, std::wstring const & name, bool removed)
+        {
+
+        }
+
+        void on_file_change(std::wstring const & path, std::wstring const & name, bool removed)
+        {
+        }
     private:
         library_map_type m_entries;
         mangapp::users & m_users;
         std::string m_database_file;
+        std::unique_ptr<mangapp::watcher> m_watcher_ptr;
     };
 }
 
