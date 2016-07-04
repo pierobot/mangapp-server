@@ -5,33 +5,60 @@
 
 #include <Windows.h>
 
+#include <atomic>
 #include <iterator>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
+#include <boost/filesystem.hpp>
 
 extern void console_write_line(std::string const & function_name, std::string const & message);
+
+static bool enable_privilege(std::string const & name)
+{
+    HANDLE token_handle = INVALID_HANDLE_VALUE;
+    bool result = false;
+
+    if (::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token_handle) == TRUE)
+    {
+        TOKEN_PRIVILEGES token{};
+
+        if (::LookupPrivilegeValueA(NULL, name.c_str(), &token.Privileges[0].Luid) == TRUE)
+        {
+            token.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+            result = ::AdjustTokenPrivileges(token_handle, FALSE, &token, 0, NULL, NULL) == TRUE;
+        }
+
+        CloseHandle(token_handle);
+    }
+
+    return result;
+}
 
 namespace mangapp
 {
     class watcher_windows : watcher
     {
     public:
-        struct context
+        struct windows_context
         {
             OVERLAPPED overlapped;
+            size_t key;
             std::wstring path;
             HANDLE handle;
-            uint8_t buffer[1024];
+            uint8_t buffer[4096];
             watcher::on_file_event on_event;
+            watcher::on_directory_fail_event on_directory_fail;
             watcher * watcher_ptr;
         };
 
-        watcher_windows(on_file_event on_path_change, on_file_event on_file_change) :
-            watcher(on_path_change, on_file_change)
+        watcher_windows(on_file_event on_path_change, on_file_event on_file_change, on_directory_fail_event on_directory_fail) :
+            watcher(on_path_change, on_file_change, on_directory_fail)
         {
+            enable_privilege(SE_BACKUP_NAME);
+            enable_privilege(SE_RESTORE_NAME);
         }
 
         virtual ~watcher_windows()
@@ -41,15 +68,31 @@ namespace mangapp
 
         virtual void start() final
         {
+            m_continue_running = true;
             m_thread = std::thread([this]()
             {
-                while (m_continue_running == true)
+                while (m_continue_running == true || m_handles.size() > 0)
                 {
                     m_io_service.run();
                     // Set the thread to an alertable state to process APCs
                     ::SleepEx(10, true);
                 }
+
+                // If execution reaches this point, the thread is shutting down.
+                // m_handles should be reset in case 'start' is called again
+                m_handles.clear();
             });
+        }
+
+        virtual void stop() final
+        {
+            m_continue_running = false;
+
+            // Cancel any pending I/O. The completion routine will take care of cleaning up resources
+            for (auto const & kv : m_handles)
+            {
+                CancelIo(kv.second);
+            }
         }
 
         virtual void add_path(std::wstring const & path) final
@@ -60,24 +103,25 @@ namespace mangapp
             {
                 HANDLE handle = ::CreateFileW(path.c_str(),
                                               FILE_LIST_DIRECTORY,
-                                              FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                              FILE_SHARE_READ,
                                               NULL,
                                               OPEN_EXISTING,
                                               FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
                                               NULL);
                 if (handle != INVALID_HANDLE_VALUE)
                 {
-                    context * context_ptr = new context{};
+                    windows_context * context_ptr = new windows_context{};
                     if (context_ptr != nullptr)
                     {
                         context_ptr->path = path;
                         context_ptr->handle = handle;
                         context_ptr->on_event = m_on_path_change;
+                        context_ptr->on_directory_fail = m_on_directory_fail;
                         context_ptr->watcher_ptr = this;
                         BOOL result = ::ReadDirectoryChangesW(handle,
                                                               &context_ptr->buffer[0],
                                                               sizeof(context_ptr->buffer),
-                                                              FALSE,
+                                                              TRUE,
                                                               FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME,
                                                               NULL,
                                                               &context_ptr->overlapped,
@@ -117,7 +161,7 @@ namespace mangapp
             auto iterator = m_handles.find(boost::hash<std::wstring>()(path));
             if (iterator != m_handles.cend())
             {
-                CloseHandle(iterator->second);
+                CancelIo(iterator->second);
                 m_handles.erase(iterator);
             }
         }
@@ -134,7 +178,7 @@ namespace mangapp
         static void CALLBACK file_io_routine(DWORD error_code, DWORD bytes_transferred, OVERLAPPED * overlapped)
         {
             // Our context starts with the OVERLAPPED structure
-            context * context_ptr = reinterpret_cast<context *>(overlapped);
+            windows_context * context_ptr = reinterpret_cast<windows_context *>(overlapped);
             if (context_ptr == nullptr)
                 return;
 
@@ -149,7 +193,47 @@ namespace mangapp
                     info_ptr = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(&context_ptr->buffer[offset]);
 
                     std::wstring name(&info_ptr->FileName[0], &info_ptr->FileName[info_ptr->FileNameLength / 2]);
+                    std::replace(name.begin(), name.end(), '\\', '/');
 
+                    std::wstring path(context_ptr->path);
+                    // path = H:/Manga/Manga/
+                    // name = Name/Example/File.zip
+                    size_t dir_name_end_pos = name.find('/');
+                    if (dir_name_end_pos != std::wstring::npos)
+                    {
+                        // Trim 'Name' and get its key
+                        std::wstring dir_name(name.substr(0, dir_name_end_pos));
+                        context_ptr->key = boost::hash<std::wstring>()(dir_name);
+                        name.erase(0, ++dir_name_end_pos);
+
+                        path += dir_name + L"/";
+                        
+                        std::wstring middle_path;
+                        size_t middle_end_pos = name.rfind('/');
+                        if (middle_end_pos != std::wstring::npos)
+                        {
+                            // Cut 'Example' to context_ptr->path
+                            middle_path = name.substr(0, ++middle_end_pos);
+                            name.erase(0, middle_end_pos);
+                            path += middle_path;
+                        }
+                        // And we're left with 'File.zip'
+                    }
+                    else
+                    {
+                        context_ptr->key = boost::hash<std::wstring>()(name);
+                    }
+
+                    // Using boost::filesystem::is_directory or ::GetFileAttributesW can fail with INVALID_FILE_ATTRIBUTES
+                    // Most likely because the object could no longer exist by the time this code is executed
+                    // Checking for the presence of a file extension would not work because a folder could be named "folder.name.hi"
+                    boost::system::error_code ec;
+                    bool is_directory = boost::filesystem::is_directory(path + name, ec);
+                    // Did an error occur?
+                    if (is_directory == false && ec != 0)
+                        // Yes, check the library if it's a directory
+                        is_directory = context_ptr->on_directory_fail(name);
+                        
                     switch (info_ptr->Action)
                     {
                     case FILE_ACTION_ADDED:
@@ -158,7 +242,7 @@ namespace mangapp
                         if (context_ptr->on_event != nullptr)
                         {
                             // Signal that a new object was created/added
-                            context_ptr->on_event(context_ptr->path, name, false);
+                            context_ptr->on_event(path, name, is_directory, false, context_ptr->key);
                         }
 
                         break;
@@ -170,7 +254,7 @@ namespace mangapp
                         if (context_ptr->on_event != nullptr)
                         {
                             // Signal that an existing object was removed/deleted
-                            context_ptr->on_event(context_ptr->path, name, true);
+                            context_ptr->on_event(path, name, is_directory, true, context_ptr->key);
                         }
 
                         break;
@@ -196,8 +280,7 @@ namespace mangapp
             }
             else
             {
-                console_write_line("aaaa", "test");
-                context_ptr->watcher_ptr->remove_path(context_ptr->path);
+                CloseHandle(context_ptr->handle);
                 delete context_ptr;
             }
         }
