@@ -224,8 +224,9 @@ namespace mangapp
                         context_ptr->key = boost::hash<std::wstring>()(name);
                     }
 
-                    // Using boost::filesystem::is_directory or ::GetFileAttributesW can fail with INVALID_FILE_ATTRIBUTES
-                    // Most likely because the object could no longer exist by the time this code is executed
+                    // There's a chance that the directory or file no longer exist by the time execution hits here.
+                    // In such a scenario, boost::filesystem::is_directory will fail with 'ec' equal to boost::system::errc::no_such_file_or_directory and
+                    // ::GetFileAttributesW will fail with INVALID_FILE_ATTRIBUTES.
                     // Checking for the presence of a file extension would not work because a folder could be named "folder.name.hi"
                     boost::system::error_code ec;
                     bool is_directory = boost::filesystem::is_directory(path + name, ec);
