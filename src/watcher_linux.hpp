@@ -8,8 +8,8 @@ namespace mangapp
     class watcher_linux : watcher
     {
     public:
-        watcher_linux(on_file_event on_path_change, on_file_event on_file_change) :
-            watcher(on_path_change, on_file_change)
+        watcher_linux(on_file_event on_path_change, on_file_event on_file_change, on_directory_fail_event on_directory_fail) :
+            watcher(on_path_change, on_file_change, on_directory_fail)
         {
         }
 
@@ -17,26 +17,21 @@ namespace mangapp
         {
         }
 
-        virtual void add_path(std::string const & path) final
+        virtual void start() final
         {
-
         }
 
-        virtual void add_file(std::string const & file_path) final
+        virtual void stop() final
         {
-
         }
 
-        virtual void remove_path(std::string const & path) final
+        virtual void add_path(std::wstring const & path) final
         {
-
         }
 
-        virtual void remove_file(std::string const & file_path) final
+        virtual void remove_path(std::wstring const & path) final
         {
-
         }
-
     protected:
     private:
 

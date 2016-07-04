@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <boost/system/error_code.hpp>
+
 namespace base
 {
     class file_entry
@@ -17,12 +19,12 @@ namespace base
         std::wstring const & get_name() const;
         std::wstring const   get_extension() const;
         size_t const get_key() const;
+        size_t const get_size() const;
     protected:
     private:
         std::wstring const m_path;
         std::wstring const m_name;
         size_t const m_key;
-        size_t const m_size;
     };
 }
 
