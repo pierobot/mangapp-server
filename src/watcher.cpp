@@ -30,7 +30,8 @@ namespace mangapp
     {
 #if defined(_WIN32)
         return std::unique_ptr<watcher>(new watcher_windows(on_path_change, on_file_change, on_directory_fail));
-#elif defined(__linux)
+#elif defined(__linux__)
+        return std::unique_ptr<watcher>(new watcher_linux(on_path_change, on_file_change, on_directory_fail));
 #endif
         return nullptr;
     }
