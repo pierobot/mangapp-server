@@ -8,6 +8,7 @@
 #include "users.hpp"
 #include "utf8.hpp"
 #include "image.hpp"
+#include "watcher.hpp"
 
 #include <unordered_map>
 
@@ -74,8 +75,12 @@ namespace base
         */
         library(std::vector<std::wstring> const & library_paths, mangapp::users & users, std::string const & database_file) :
             m_entries(),
+            m_entries_mutex(),
             m_users(users),
-            m_database_file(database_file)
+            m_database_file(database_file),
+            m_watcher_ptr(mangapp::watcher::create([this](std::wstring const & path, std::wstring const & name, bool is_dir, bool remove, size_t key) -> void { on_path_change(path, name, is_dir, remove, key); },
+                                                   [this](std::wstring const & path, std::wstring const & name, bool is_dir, bool remove, size_t key) -> void { on_file_change(path, name, is_dir, remove, key); },
+                                                   [this](std::wstring const & name) -> bool { return is_library_dir(name); }))
         {
             // Iterate through the libraries
             for (auto const & library_path : library_paths)
@@ -89,9 +94,14 @@ namespace base
                     std::wstring path_str(path, 0, path_end_pos + 1);
 
                     auto key = boost::hash<std::wstring>()(name_str);
+                    std::lock_guard<std::mutex> lock(m_entries_mutex);
                     m_entries.emplace(key, directory_entry_type(path_str, name_str, key));
                 });
+
+                m_watcher_ptr->add_path(library_path);
             }
+
+            m_watcher_ptr->start();
         }
 
         library(std::vector<std::string> const & library_paths, mangapp::users & users, std::string const & database_file) :
@@ -149,11 +159,14 @@ namespace base
 
             // Enumerate all the entries the user can access
             std::vector<std::reference_wrapper<directory_entry_type const>> ordered;
-            for (auto const & pair : m_entries)
+
             {
-                size_t path_key = boost::hash<std::wstring>()(pair.second.get_path());
-                if (m_users.can_access(session_id, path_key) == true)
-                    ordered.push_back(std::cref(pair.second));
+                for (auto const & pair : m_entries)
+                {
+                    size_t path_key = boost::hash<std::wstring>()(pair.second.get_path());
+                    if (m_users.can_access(session_id, path_key) == true)
+                        ordered.push_back(std::cref(pair.second));
+                }
             }
 
             // Collate the entries
@@ -246,8 +259,8 @@ namespace base
 
         mstch::map const get_reader_context(std::string const & session_id, key_type key, key_type file_key) const
         {
-            auto const entry_iterator = find(key);
-            if (entry_iterator != cend())
+            auto const entry_iterator = library::find(key);
+            if (entry_iterator != library::cend())
             {
                 // Ensure the user has access
                 size_t path_key = boost::hash<std::wstring>()(entry_iterator->second.get_path());
@@ -315,9 +328,9 @@ namespace base
         {
             std::string thumb_data;
 
-            auto const manga_comic_iterator = find(key);
+            auto const manga_comic_iterator = library::find(key);
             // Does the specified key exist in our map?
-            if (manga_comic_iterator != cend())
+            if (manga_comic_iterator != library::cend())
             {
                 // Look for an existing thumbnail
                 directory_entry_type const & dir_entry = manga_comic_iterator->second;
@@ -432,6 +445,7 @@ namespace base
 
             return image_contents;
         }
+
     protected:
         virtual void search_online_source(directory_entry_type & entry, std::function<void(mstch::map&&, bool)> on_event)
         {
@@ -464,10 +478,63 @@ namespace base
 
             on_query(query.begin(), query.end());
         }
+
+        /** 
+        *   Indicates whether or not the directory specified by 'name' exists in the library.
+        *   
+        *	This method is invoked by the watcher class whenever it is unable to obtain information on a directory object.
+        *   Reason being, the directory object can be deleted by the time its code is called - there'd be no way to access its attributes.
+        *   I'm unsure if this behavior is also present on Linux.
+        */
+        bool is_library_dir(std::wstring const & name) const
+        {
+            return library::find(boost::hash<std::wstring>()(name)) != library::cend();
+        }
+
+        void on_path_change(std::wstring const & path, std::wstring const & name, bool is_directory, bool removed, size_t key)
+        {
+            // Does the manga/comic already exist?
+            auto manga_comic_iterator = library::find(key);
+            if (manga_comic_iterator != library::cend())
+            {
+                // Yes
+                std::lock_guard<std::mutex> lock(m_entries_mutex);
+
+                if (is_directory == false)
+                {
+                    if (removed == false)
+                        manga_comic_iterator->second.add_file(path, name);
+                    else
+                        manga_comic_iterator->second.remove_file(name);
+                }
+                else
+                {
+                    if (removed == true)
+                        m_entries.erase(manga_comic_iterator);
+                }
+            }
+            else
+            {
+                // No
+                std::lock_guard<std::mutex> lock(m_entries_mutex);
+
+                if (is_directory == true)
+                {
+                    if (removed == false)
+                        m_entries.emplace(key, directory_entry_type(path, name, key));
+                }
+            }
+        }
+
+        void on_file_change(std::wstring const & path, std::wstring const & name, bool is_directory, bool removed, size_t key)
+        {
+        }
     private:
         library_map_type m_entries;
+        std::mutex m_entries_mutex;
         mangapp::users & m_users;
         std::string m_database_file;
+        std::unique_ptr<mangapp::watcher> m_watcher_ptr;
     };
 }
 

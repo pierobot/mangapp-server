@@ -111,6 +111,31 @@ namespace base
         {
             return m_key;
         }
+
+        void add_file(std::wstring const & path, std::wstring const & name)
+        {
+            boost::filesystem::path bpath(name);
+            auto const & extension = bpath.extension().generic_wstring();
+            
+            if (is_image_extension(extension) == true ||
+                is_archive_extension(extension) == true)
+            {
+                auto key = boost::hash<std::wstring>()(name);
+                m_files.emplace(key, file_entry_type(path, name, key));
+            }
+        }
+
+        void remove_file(std::wstring const & name)
+        {
+            auto key = boost::hash<std::wstring>()(name);
+            auto file_iterator = m_files.find(key);
+
+            if (file_iterator != m_files.cend())
+            {
+                m_files.erase(file_iterator);
+            }
+        }
+
     protected:
         map_type m_files;
     private:

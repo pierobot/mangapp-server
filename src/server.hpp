@@ -12,7 +12,7 @@
 
 #include "manga_library.hpp"
 #include "users.hpp"
-#include "middleware_deflate.hpp"
+#include "middleware_compression.hpp"
 
 namespace mangapp
 {

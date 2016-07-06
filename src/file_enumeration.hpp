@@ -1,6 +1,7 @@
 #ifndef FILE_ENUMERATION_HPP
 #define FILE_ENUMERATION_HPP
 
+#include <iostream>
 #include <functional>
 #include <string>
 
@@ -24,7 +25,8 @@ inline void enumerate_files(std::wstring const & path,
     if (callback_fn == nullptr)
         return;
 
-    for (auto current = directory_iterator(path); current != directory_iterator(); ++current)
+    boost::system::error_code ec;
+    for (auto current = directory_iterator(path, ec); current != directory_iterator(); ++current)
     {
         auto const & path_str = current->path().generic_wstring();
 
@@ -43,6 +45,11 @@ inline void enumerate_files(std::wstring const & path,
         {
             callback_fn(path_str, file_search_flags::FlagFile);
         }
+    }
+
+    if (ec)
+    {
+        std::cout << ec.value() << " " << ec.message() << std::endl;
     }
 }
 
