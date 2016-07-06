@@ -97,7 +97,8 @@ namespace mangapp
                             std::copy(&notification->name[0], &notification->name[notification->len], std::back_inserter(utf8_name));
                             // notification->len includes trailing NULL characters. Trim those when converting to utf16
                             std::wstring name = to_utf16(utf8_name.begin(), std::find(utf8_name.cbegin(), utf8_name.cend(), '\0'));
-                            std::wstring const & path = path_iterator->second + L"/";
+                            bool needs_trailing_slash = path_iterator->second.back() != '/' ? true : false;
+                            std::wstring const & path = needs_trailing_slash == true ? path_iterator->second + L"/" : path_iterator->second;
                             size_t key = -1;
 
                             // Get the name of the directory_entry in our library
